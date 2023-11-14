@@ -1,0 +1,16 @@
+[tool.poetry]
+name = "eeet2582-backend"
+version = "0.1.0"
+description = ""
+readme = "README.md"
+authors = ["Quynh Le"]
+
+[tool.poetry.dependencies]
+python = "^3.12"
+django = "^4.0.0"
+environ = "^1.0"
+django-allauth = "0.51.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
