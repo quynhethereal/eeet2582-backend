@@ -39,13 +39,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    # 3rd party
-    "allauth",  # new
-    "allauth.account",  # new
-    "allauth.socialaccount",  # new
-    # social providers
-    "allauth.socialaccount.providers.github",  # new
-    "allauth.socialaccount.providers.twitter",  # new
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.github",
+    "allauth.socialaccount.providers.twitter",
 ]
 
 MIDDLEWARE = [

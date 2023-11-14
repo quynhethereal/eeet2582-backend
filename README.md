@@ -45,3 +45,10 @@ python3 manage.py migrate
 ```bash
 python3 manage.py runserver
 ```
+
+## Superuser setup
+1. Create superuser (I'm using admin as username and password)
+```bash
+python3 manage.py createsuperuser
+```
+2. Go to http://localhost:8000/admin/ and login with the superuser credentials
