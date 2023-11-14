@@ -6,7 +6,7 @@
 ## Environment variables setup
 1. Copy .env.example to .env
 ```bash
-cp .env.example .env
+cd eeet2582_backend && cp .env.example .env
 ```
 
 ## Database setup 
