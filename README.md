@@ -38,17 +38,24 @@ CREATE DATABASE eeet2582_backend;
 
 5. Go back to project directory and run migrations
 ```bash
-python3 manage.py migrate
+poetry install && poetry run manage.py migrate
 ```
 
 6. Finally, run the server
 ```bash
-python3 manage.py runserver
+poetry manage.py runserver
 ```
 
 ## Superuser setup
 1. Create superuser (I'm using admin as username and password)
 ```bash
-python3 manage.py createsuperuser
+poetry manage.py createsuperuser
 ```
 2. Go to http://localhost:8000/admin/ and login with the superuser credentials
+
+
+## Run server in virtual environment using poetry
+
+```bash 
+poetry manage.py runserver
+```
