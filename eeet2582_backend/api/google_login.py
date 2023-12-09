@@ -12,14 +12,13 @@ UserModel = get_user_model()
 class GoogleSignIn(APIView):
     def post(self, request, *args, **kwargs):
         access_token = request.GET.get('access_token')
-        print(access_token);
+        # print(access_token)
         google_account = self.get_google_account(access_token)
         if not google_account:
             return Response({'message': 'Google account not exists.'}, status=status.HTTP_400_BAD_REQUEST)
 
         print(google_account)
-        email = google_account['email']
-        user = self.get_or_create_user(email, google_account)
+        user = self.get_or_create_user(google_account)
 
         if user.is_active:
             # Generate JWT token or use any other authentication mechanism
@@ -39,14 +38,14 @@ class GoogleSignIn(APIView):
         data = res.read()
         return json.loads(data.decode("utf-8"))
 
-    def get_or_create_user(self, email, google_account):
+    def get_or_create_user(self, google_account):
         try:
             user = UserProfile.objects.get(provider='google', provider_id=google_account['id'])
         except UserProfile.DoesNotExist:
             user = UserProfile.objects.create(
-                email=email,
                 provider='google',
                 provider_id=google_account['id'],
+                email=google_account['email'],
                 name=google_account['name'],
                 picture=google_account['picture'],
             )
