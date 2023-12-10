@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.twitter",
     'eeet2582_backend.apps.Eeet2582Config',
     'corsheaders',
+    'drf_yasg',
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -121,6 +122,11 @@ DATABASES = {
         'HOST': env("DB_HOST"),
         'PORT': env("DB_PORT"),
     }
+}
+
+REST_FRAMEWORK = {
+    'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
+
 }
 
 # Password validation
