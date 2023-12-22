@@ -59,8 +59,6 @@ poetry run manage.py createsuperuser
 ```bash 
 poetry run manage.py runserver
 ```
-
-
 ## Database setup (Win 11 & 10)
 1. Download & install choco package manager by following instruction from this [link](https://chocolatey.org/install).
 2. Use choco to install OpenSSL. Please open the powershell in administration mode
@@ -117,7 +115,6 @@ poetry run python manage.py runserver
 poetry run python manage.py createsuperuser
 ```
 2. Go to http://localhost:8000/admin/ and login with the superuser credentials
-
 
 ## Run server in virtual environment using poetry
 
