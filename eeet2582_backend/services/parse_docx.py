@@ -1,7 +1,7 @@
 from docx import Document
 import re
 
-from eeet2582_backend.models import DocumentTitle, UserDocument, DocumentParagraph, Heading
+from eeet2582_backend.models import DocumentTitle, UserDocument, DocumentParagraph, Heading, EndNote
 
 
 class ParseDocxService:
@@ -47,5 +47,9 @@ class ParseDocxService:
                             orphan_heading.save()
                         else:
                             DocumentParagraph.objects.create(user_document=document_instance, content=paragraph_content)
+
+                    if paragraph.style.name == 'EndNote Bibliography':
+                        EndNote.objects.create(user_document=document_instance, content=paragraph_content)
+                        continue
 
         return None
