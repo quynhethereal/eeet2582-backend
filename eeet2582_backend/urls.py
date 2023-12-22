@@ -17,9 +17,11 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from .api import google_login
+from .api.parse_docx import ParseDocxAPIView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path("accounts/", include("allauth.urls")),  # new
+    # path("accounts/", include("allauth.urls")),  # new
     path("login/google", google_login.GoogleSignIn.as_view()),
+    path('api/parse-docx', ParseDocxAPIView.as_view()),
 ]

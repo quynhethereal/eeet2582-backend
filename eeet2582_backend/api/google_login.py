@@ -7,16 +7,17 @@ from django.contrib.auth import get_user_model
 
 UserModel = get_user_model()
 
+
 class GoogleSignIn(APIView):
     def post(self, request, *args, **kwargs):
         # Extracting the access token from the Authorization header
         access_token = self.extract_access_token(request)
-        
+
         if not access_token:
             return Response({'message': 'Access token not provided.'}, status=status.HTTP_400_BAD_REQUEST)
-        
+
         print(access_token)
-        
+
         google_account = self.get_google_account(access_token)
         if not google_account:
             return Response({'message': 'Google account not exists.'}, status=status.HTTP_400_BAD_REQUEST)
