@@ -3,6 +3,7 @@ import re
 
 from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
 from eeet2582_backend.api.models.document_title import DocumentTitle
+from eeet2582_backend.api.models.endnote import EndNote
 from eeet2582_backend.api.models.heading import Heading
 from eeet2582_backend.api.models.user_document import UserDocument
 
@@ -50,5 +51,9 @@ class ParseDocxService:
                             orphan_heading.save()
                         else:
                             DocumentParagraph.objects.create(user_document=document_instance, content=paragraph_content)
+
+                    if paragraph.style.name == 'EndNote Bibliography':
+                        EndNote.objects.create(user_document=document_instance, content=paragraph_content)
+                        continue
 
         return None
