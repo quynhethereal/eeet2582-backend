@@ -2,7 +2,7 @@ from docx import Document
 import re
 
 from eeet2582_backend.models import DocumentTitle, UserDocument, DocumentParagraph, Heading, EndNote
-
+from .return_docx import create_docx
 
 class ParseDocxService:
     heading_pattern = re.compile(r"Heading \d")
@@ -51,5 +51,5 @@ class ParseDocxService:
                     if paragraph.style.name == 'EndNote Bibliography':
                         EndNote.objects.create(user_document=document_instance, content=paragraph_content)
                         continue
-
+        create_docx()
         return None
