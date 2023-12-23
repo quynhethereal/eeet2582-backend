@@ -37,5 +37,6 @@ urlpatterns = [
     path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
     path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path("login/google", google_login.GoogleSignIn.as_view()),
-    path("payment",  payment.Payment.as_view()),
+    path("payment/create-checkout-session",  payment.StripeCheckoutView.as_view()),
+    
 ]

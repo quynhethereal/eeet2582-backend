@@ -622,6 +622,32 @@ doc = ["sphinx"]
 test = ["pytest", "pytest-cov"]
 
 [[package]]
+name = "stripe"
+version = "7.10.0"
+description = "Python bindings for the Stripe API"
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "stripe-7.10.0-py2.py3-none-any.whl", hash = "sha256:57e2414ad17fe3444188573fb2e26903cd27dbd92791feda7f0688382fb4c840"},
+    {file = "stripe-7.10.0.tar.gz", hash = "sha256:e789b89be1068dc86e036f53bb44734df6858dcff5ff603ef2850d2e1a17ca24"},
+]
+
+[package.dependencies]
+requests = {version = ">=2.20", markers = "python_version >= \"3.0\""}
+typing-extensions = {version = ">=4.5.0", markers = "python_version >= \"3.7\""}
+
+[[package]]
+name = "typing-extensions"
+version = "4.9.0"
+description = "Backported and Experimental Type Hints for Python 3.8+"
+optional = false
+python-versions = ">=3.8"
+files = [
+    {file = "typing_extensions-4.9.0-py3-none-any.whl", hash = "sha256:af72aea155e91adfc61c3ae9e0e342dbc0cba726d6cba4b6c72c1f34e47291cd"},
+    {file = "typing_extensions-4.9.0.tar.gz", hash = "sha256:23478f88c37f27d76ac8aee6c905017a143b0b1b886c3c9f66bc2fd94f9f5783"},
+]
+
+[[package]]
 name = "tzdata"
 version = "2023.3"
 description = "Provider of IANA time zone data"
@@ -662,4 +688,4 @@ zstd = ["zstandard (>=0.18.0)"]
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.12"
-content-hash = "980c498f7a736e086744b0f498d32a8538d0037c72d7c7b7669a99f0a2ad5581"
+content-hash = "e5c2220084759f94afc06ff3f8f023019b4eabdedc07226edb5f00ece75c86f9"
