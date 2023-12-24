@@ -1,7 +1,7 @@
 from docx import Document
 import re
 
-from eeet2582_backend.models import DocumentTitle, UserDocument, DocumentParagraph, Heading, EndNote, ListParagraph
+from eeet2582_backend.models import *
 
 
 class ParseDocxService:
@@ -15,7 +15,8 @@ class ParseDocxService:
         document_instance = None
         document_title = None
         current_paragraph = None
-
+        document_table = None
+        
         for paragraph in document.paragraphs:
             # extract title from the first paragraph that is not empty
             if paragraph.text.strip() and not document_title:
@@ -69,5 +70,22 @@ class ParseDocxService:
                     if paragraph.style.name == 'EndNote Bibliography':
                         EndNote.objects.create(user_document=document_instance, content=paragraph_content)
                         continue
+        for table in document.tables:
+            if document_instance is None:
+            # Ensure document_instance is created before processing tables
+                continue  # Or handle the case where no document_instance is found
+            
+            # Create a DocumentTable instance for each table in the document
+            document_table = DocumentTable.objects.create(user_document=document_instance, content="")
 
+            for i, row in enumerate(table.rows):
+                # Create a TableRow instance for each row in the table
+                table_row = TableRow.objects.create(user_document=document_instance, document_table=document_table, content="")
+
+                for cell in row.cells:
+                    # Extract content from each cell
+                    cell_content = cell.text.strip()
+
+                    # Create a RowCell instance for each cell in the row
+                    RowCell.objects.create(user_document=document_instance, document_table=document_table, table_row=table_row, content=cell_content)
         return None
