@@ -1,6 +1,6 @@
 import os
 from docx import Document
-from eeet2582_backend.models import DocumentTitle, UserDocument, DocumentParagraph, Heading, EndNote
+from eeet2582_backend.models import DocumentTitle, UserDocument, DocumentParagraph, Heading, EndNote, ListParagraph
 
 def create_docx():
     user_doc = UserDocument.objects.latest('created_at')
@@ -13,20 +13,37 @@ def create_docx():
 
     # Fetch and sort headings and paragraphs
     headings = Heading.objects.filter(user_document=user_doc)
+    list_paragraphs = ListParagraph.objects.filter(user_document=user_doc)
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
 
-     # Case 1: Paragraphs without headings
     for para in paragraphs:
-        if not headings.filter(document_paragraph=para).exists():
-            doc.add_paragraph(para.content)
-        else:
-            # Case 2: Headings with paragraphs
-            related_headings = headings.filter(document_paragraph=para)
+        related_headings = headings.filter(document_paragraph=para)
+        related_list_paragraphs = list_paragraphs.filter(document_paragraph=para)
+        has_heading = related_headings.exists()
+        has_list_paragraph = related_list_paragraphs.exists()
+        
+        # Case both heading and list paragraph with paragraph (ID equal)
+        if has_heading and has_list_paragraph:
             for heading in related_headings:
                 doc.add_heading(heading.content, level=1)
-                doc.add_paragraph(para.content)
+            doc.add_paragraph(para.content)
+            for list_para in related_list_paragraphs:
+                doc.add_paragraph(list_para.content, style='List Bullet')
+        # Case heading with paragraph (ID equal)
+        elif has_heading:
+            for heading in related_headings:
+                doc.add_heading(heading.content, level=1)
+            doc.add_paragraph(para.content)
+        # Case List paragraph with paragraph (ID equal)
+        elif has_list_paragraph:
+            doc.add_paragraph(para.content)
+            for list_para in related_list_paragraphs:
+                doc.add_paragraph(list_para.content, style='List Bullet')
+        # Case paragraph stand alone
+        else:
+            doc.add_paragraph(para.content)
 
-    # Case 3: Headings without paragraphs
+    # Case Headings without paragraphs
     standalone_headings = headings.filter(document_paragraph__isnull=True)
     for heading in standalone_headings:
         doc.add_heading(heading.content, level=1)
