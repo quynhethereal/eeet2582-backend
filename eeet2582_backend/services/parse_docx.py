@@ -1,8 +1,9 @@
 from docx import Document
 import re
 
-from eeet2582_backend.models import DocumentTitle, UserDocument, DocumentParagraph, Heading, EndNote
 from .return_docx import create_docx
+from eeet2582_backend.models import DocumentTitle, UserDocument, DocumentParagraph, Heading, EndNote, ListParagraph
+
 
 class ParseDocxService:
     heading_pattern = re.compile(r"Heading \d")
@@ -14,6 +15,7 @@ class ParseDocxService:
         document = Document(self.file_path)
         document_instance = None
         document_title = None
+        current_paragraph = None
 
         for paragraph in document.paragraphs:
             # extract title from the first paragraph that is not empty
@@ -34,6 +36,18 @@ class ParseDocxService:
 
                         # import pdb; pdb.set_trace()
                         continue
+
+                    if paragraph.style.name == 'List Paragraph':
+                        # if there is no current paragraph, then we get the last paragraph
+                        if not current_paragraph:
+                            current_paragraph = DocumentParagraph.objects.filter(user_document=document_instance).last()
+                            continue
+
+                        ListParagraph.objects.create(user_document=document_instance,
+                                                     document_paragraph=current_paragraph,
+                                                     content=paragraph_content)
+                        continue
+
                     if paragraph.style.name == 'Normal':
                         # first check if there is a heading before this paragraph
                         headings_without_paragraphs = Heading.objects.filter(user_document=document_instance,
@@ -42,11 +56,16 @@ class ParseDocxService:
                         if headings_without_paragraphs.exists():
                             orphan_heading = headings_without_paragraphs.first()
                             # if there is a heading without a paragraph, then we assign the paragraph to that heading
-                            orphan_heading.document_paragraph = DocumentParagraph.objects.create(
+                            current_paragraph = DocumentParagraph.objects.create(
                                 user_document=document_instance, content=paragraph_content)
+
+                            orphan_heading.document_paragraph = current_paragraph
                             orphan_heading.save()
                         else:
-                            DocumentParagraph.objects.create(user_document=document_instance, content=paragraph_content)
+                            current_paragraph = DocumentParagraph.objects.create(user_document=document_instance,
+                                                                                 content=paragraph_content)
+
+                        continue
 
                     if paragraph.style.name == 'EndNote Bibliography':
                         EndNote.objects.create(user_document=document_instance, content=paragraph_content)
