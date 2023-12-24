@@ -47,7 +47,7 @@ class ParseDocxService:
                                                      content=paragraph_content)
                         continue
 
-                    if paragraph.style.name == 'Normal':
+                    if paragraph.style.name == 'Normal' or paragraph.style.name == 'Normal (Web)':
                         # first check if there is a heading before this paragraph
                         headings_without_paragraphs = Heading.objects.filter(user_document=document_instance,
                                                                              document_paragraph=None)
