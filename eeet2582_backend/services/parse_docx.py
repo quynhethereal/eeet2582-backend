@@ -2,7 +2,7 @@ from docx import Document
 import re
 
 from docx.text.paragraph import Paragraph
-
+from .return_docx import create_docx
 from eeet2582_backend.models import DocumentTitle, UserDocument, DocumentParagraph, Heading, EndNote, ListParagraph
 from docx.oxml.table import CT_Tbl
 from docx.oxml.text.paragraph import CT_P
@@ -78,4 +78,5 @@ class ParseDocxService:
             elif isinstance(element, CT_Tbl):
                 print("Table found.")
 
+        create_docx()
         return None
