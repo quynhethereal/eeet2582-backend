@@ -2,7 +2,7 @@ from rest_framework.authentication import BaseAuthentication
 from rest_framework import exceptions
 import requests
 import stripe
-from datetime import datetime
+from django.utils import timezone
 from django.conf import settings
 from ..api.models.user_model import User  # Ensure you import your User model
 from ..api.models.payment_model import Payment
@@ -77,9 +77,24 @@ class GoogleOAuth2Authentication(BaseAuthentication):
                 customer=customer.id,
                 items=[{'price': settings.STRIPE_3MONTH_PRICE_ID}],  # Replace with your Stripe plan ID
                 trial_period_days=20,
-                payment_settings={"save_default_payment_method": "on_subscription"},
                 trial_settings={"end_behavior": {"missing_payment_method": "cancel"}},
-            )         
+            )
+
+
+            # Create or update the Payment record
+            subscription_data = subscription.to_dict()
+            payment, created = Payment.objects.update_or_create(
+                user=user,
+                defaults={
+                    'stripe_subscription_id': subscription.id,
+                    'stripe_customer_id': customer.id,
+                    'plan_name':subscription_data['items']['data'][0]['price']['lookup_key'], 
+                    'status': subscription.status,
+                    'start_date': timezone.make_aware(timezone.datetime.fromtimestamp(subscription.current_period_start)),
+                    'end_date': timezone.make_aware(timezone.datetime.fromtimestamp(subscription.current_period_end)),
+                    'price': subscription_data['items']['data'][0]['plan']['amount'] / 100
+                }
+            )           
 
         except stripe.error.StripeError as e:
             # Handle Stripe errors

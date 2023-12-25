@@ -1,4 +1,4 @@
-import datetime
+from django.utils import timezone
 from django.conf import settings
 from ..models.user_model import User
 from ..models.payment_model import Payment  
@@ -29,33 +29,43 @@ def stripe_webhook(request):
         # # Retrieve or create the Payment record
         subscription = stripe.Subscription.retrieve(data.stripe_id)
         subscription_data = subscription.to_dict()
-        print(subscription)
-        payment, created = Payment.objects.get_or_create(
-            stripe_subscription_id=subscription.id
+
+        # Delete any existing trial subscriptions
+        for sub in stripe.Subscription.list(customer=subscription.customer):
+            if sub.id != subscription.id and sub.status == 'trialing':
+                stripe.Subscription.delete(sub.id)
+                
+        #update payment info
+        payment = Payment.objects.get(
+            stripe_customer_id = subscription.customer
         )
         payment.plan_name = subscription_data['items']['data'][0]['price']['lookup_key']
         payment.price =  subscription_data['items']['data'][0]['plan']['amount'] / 100
         
         payment.status = subscription.status
-        payment.start_date = datetime.fromtimestamp(subscription.current_period_start)
-        payment.end_date = datetime.fromtimestamp(subscription.current_period_end)
+        payment.start_date = timezone.make_aware(timezone.datetime.fromtimestamp(subscription.current_period_start))
+        payment.end_date = timezone.make_aware(timezone.datetime.fromtimestamp(subscription.current_period_end))
         payment.save()
 
     elif event['type'] == 'customer.subscription.updated':
         print(" subscription update")
-        pass
+        data = event['data']['object']
+        subscription = stripe.Subscription.retrieve(data.stripe_id)
+        
+        if subscription.cancel_at_period_end == False:
+            pass
+
+        
+        #update payment info
+        payment = Payment.objects.get(
+            stripe_customer_id = subscription.customer
+        )
+        
+        payment.status = "endsoon"
+        payment.save()
+        
     elif event['type'] == 'customer.subscription.deleted':
         print("delete")
         pass
-    elif event['type'] == 'invoice.created' or event['type'] == 'customer.subscription.updated':
-        subscription = event['data']['object']
-        # Check if this is the end of the trial period
-        if subscription['trial_end'] and subscription['metadata'].get('cancel_after_trial') == 'true':
-            try:
-                stripe.Subscription.delete(subscription['id'])
-                
-            except stripe.error.StripeError as e:
-                # Handle error
-                print(e)
 
     return HttpResponse(status=200)
