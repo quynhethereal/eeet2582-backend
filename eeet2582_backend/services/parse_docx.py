@@ -1,8 +1,11 @@
 from docx import Document
 import re
 
-from .return_docx import create_docx
+from docx.text.paragraph import Paragraph
+
 from eeet2582_backend.models import DocumentTitle, UserDocument, DocumentParagraph, Heading, EndNote, ListParagraph
+from docx.oxml.table import CT_Tbl
+from docx.oxml.text.paragraph import CT_P
 
 
 class ParseDocxService:
@@ -17,58 +20,62 @@ class ParseDocxService:
         document_title = None
         current_paragraph = None
 
-        for paragraph in document.paragraphs:
-            # extract title from the first paragraph that is not empty
-            if paragraph.text.strip() and not document_title:
-                document_title = DocumentTitle.objects.create(title=paragraph.text)
+        for element in document.element.body:
+            # Case 1: Paragraph
+            if isinstance(element, CT_P):
+                paragraph = Paragraph(element, document)
+                # extract title from the first paragraph that is not empty
+                if paragraph.text.strip() and not document_title:
+                    document_title = DocumentTitle.objects.create(title=paragraph.text)
 
-                document_instance = UserDocument.objects.create(document_title=document_title)
-                continue
-                # return document_instance
+                    document_instance = UserDocument.objects.create(document_title=document_title)
+                    continue
+                    # return document_instance
 
+                elif document_instance:
+                    paragraph_content = paragraph.text.strip()
 
-            elif document_instance:
-                paragraph_content = paragraph.text.strip()
+                    if paragraph_content:
+                        if re.match(self.heading_pattern, paragraph.style.name):
+                            Heading.objects.create(user_document=document_instance, content=paragraph_content)
 
-                if paragraph_content:
-                    if re.match(self.heading_pattern, paragraph.style.name):
-                        Heading.objects.create(user_document=document_instance, content=paragraph_content)
-
-                        # import pdb; pdb.set_trace()
-                        continue
-
-                    if paragraph.style.name == 'List Paragraph':
-                        # if there is no current paragraph, then we get the last paragraph
-                        if not current_paragraph:
-                            current_paragraph = DocumentParagraph.objects.filter(user_document=document_instance).last()
+                            # import pdb; pdb.set_trace()
                             continue
 
-                        ListParagraph.objects.create(user_document=document_instance,
-                                                     document_paragraph=current_paragraph,
-                                                     content=paragraph_content)
-                        continue
+                        if paragraph.style.name == 'List Paragraph':
+                            # if there is no current paragraph, then we get the last paragraph
+                            if not current_paragraph:
+                                current_paragraph = DocumentParagraph.objects.filter(user_document=document_instance).last()
+                                continue
 
-                    if paragraph.style.name == 'Normal' or paragraph.style.name == 'Normal (Web)':
-                        # first check if there is a heading before this paragraph
-                        headings_without_paragraphs = Heading.objects.filter(user_document=document_instance,
-                                                                             document_paragraph=None)
+                            ListParagraph.objects.create(user_document=document_instance,
+                                                         document_paragraph=current_paragraph,
+                                                         content=paragraph_content)
+                            continue
 
-                        if headings_without_paragraphs.exists():
-                            orphan_heading = headings_without_paragraphs.first()
-                            # if there is a heading without a paragraph, then we assign the paragraph to that heading
-                            current_paragraph = DocumentParagraph.objects.create(
-                                user_document=document_instance, content=paragraph_content)
+                        if paragraph.style.name == 'Normal' or paragraph.style.name == 'Normal (Web)':
+                            # first check if there is a heading before this paragraph
+                            headings_without_paragraphs = Heading.objects.filter(user_document=document_instance,
+                                                                                 document_paragraph=None)
 
-                            orphan_heading.document_paragraph = current_paragraph
-                            orphan_heading.save()
-                        else:
-                            current_paragraph = DocumentParagraph.objects.create(user_document=document_instance,
-                                                                                 content=paragraph_content)
+                            if headings_without_paragraphs.exists():
+                                orphan_heading = headings_without_paragraphs.first()
+                                # if there is a heading without a paragraph, then we assign the paragraph to that heading
+                                current_paragraph = DocumentParagraph.objects.create(
+                                    user_document=document_instance, content=paragraph_content)
 
-                        continue
+                                orphan_heading.document_paragraph = current_paragraph
+                                orphan_heading.save()
+                            else:
+                                current_paragraph = DocumentParagraph.objects.create(user_document=document_instance,
+                                                                                     content=paragraph_content)
 
-                    if paragraph.style.name == 'EndNote Bibliography':
-                        EndNote.objects.create(user_document=document_instance, content=paragraph_content)
-                        continue
-        create_docx()
+                            continue
+
+                        if paragraph.style.name == 'EndNote Bibliography':
+                            EndNote.objects.create(user_document=document_instance, content=paragraph_content)
+                            continue
+            elif isinstance(element, CT_Tbl):
+                print("Table found.")
+
         return None
