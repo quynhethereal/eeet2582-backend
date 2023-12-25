@@ -4,6 +4,7 @@ import re
 from eeet2582_backend.models import *
 
 from docx.text.paragraph import Paragraph
+from docx.table import Table
 from docx.oxml.table import CT_Tbl
 from docx.oxml.text.paragraph import CT_P
 
@@ -78,8 +79,12 @@ class ParseDocxService:
                 if document_instance is None:
                     continue  # Or handle the case where no document_instance is found
                 # Create a DocumentTable instance for each table in the document
-                document_table = DocumentTable.objects.create(user_document=document_instance, content="")
-                for i, row in enumerate(element.rows):
+                table = Table(element, document)
+                if current_paragraph:
+                    document_table = DocumentTable.objects.create(user_document=document_instance, document_paragraph=current_paragraph, content="")
+                else:
+                    document_table = DocumentTable.objects.create(user_document=document_instance, content="")
+                for i, row in enumerate(table.rows):
                     # Create a TableRow instance for each row in the table
                     table_row = TableRow.objects.create(user_document=document_instance, document_table=document_table, content="")
 
