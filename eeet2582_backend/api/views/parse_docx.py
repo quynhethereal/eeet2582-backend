@@ -8,6 +8,9 @@ from eeet2582_backend.services.parse_docx import ParseDocxService
 
 
 class ParseDocxAPIView(APIView):
+    # TODO: Enable authentication and permissions
+    authentication_classes = []
+    permission_classes = []
     def post(self, request, *args, **kwargs):
         if request.FILES.get('docx_file'):
             docx_file = request.FILES['docx_file']
