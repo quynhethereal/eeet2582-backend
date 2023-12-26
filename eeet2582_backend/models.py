@@ -96,3 +96,75 @@ class RowCell(models.Model):
 
     def __str__(self):
         return f"{self.content}"
+    
+# class DocumentTitle(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     title = models.CharField(max_length=255)
+#
+#     def __str__(self):
+#         return self.title
+
+
+# class UserDocument(models.Model):
+#     # user = models.ForeignKey(User, on_delete=models.CASCADE)
+#     document_title = models.OneToOneField('DocumentTitle', on_delete=models.CASCADE)
+#     content = models.TextField()
+#     created_at = models.DateTimeField(auto_now_add=True)
+#
+#     def __str__(self):
+#         return f"{self.document_title}"
+
+
+# class DocumentParagraph(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     user_document = models.ForeignKey('UserDocument', on_delete=models.CASCADE)
+#     content = models.TextField()
+#
+#     def __str__(self):
+#         return f"{self.content}"
+#
+
+# class Heading(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     user_document = models.ForeignKey('UserDocument', on_delete=models.CASCADE)
+#     document_paragraph = models.ForeignKey('DocumentParagraph', on_delete=models.CASCADE, null=True)
+#     content = models.TextField()
+#
+#     def __str__(self):
+#         return f"{self.content}"
+
+
+# class Heading(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     user_document = models.ForeignKey('UserDocument', on_delete=models.CASCADE)
+#     document_paragraph = models.ForeignKey('DocumentParagraph', on_delete=models.CASCADE, null=True)
+#     content = models.TextField()
+#
+#     def __str__(self):
+#         return f"{self.content}"
+
+# class EndNote(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     user_document = models.ForeignKey('UserDocument', on_delete=models.CASCADE)
+#     content = models.TextField()
+#
+#     def __str__(self):
+#         return f"{self.content}"
+
+# class EndNote(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     user_document = models.ForeignKey('UserDocument', on_delete=models.CASCADE)
+#     content = models.TextField()
+#
+#     def __str__(self):
+#         return f"{self.content}"
+
+
+# class ListParagraph(models.Model):
+#     id = models.AutoField(primary_key=True)
+#     user_document = models.ForeignKey('UserDocument', on_delete=models.CASCADE)
+#     document_paragraph = models.ForeignKey('DocumentParagraph', on_delete=models.CASCADE, null=True)
+#     content = models.TextField()
+#
+#     def __str__(self):
+#         return f"{self.content}"
