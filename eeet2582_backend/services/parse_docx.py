@@ -3,15 +3,17 @@ import re
 
 from eeet2582_backend.models import *
 
-from docx.text.paragraph import Paragraph
-from docx.table import Table
 from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
 from eeet2582_backend.api.models.document_title import DocumentTitle
 from eeet2582_backend.api.models.endnote import EndNote
 from eeet2582_backend.api.models.heading import Heading
 from eeet2582_backend.api.models.list_paragraph import ListParagraph
 from eeet2582_backend.api.models.user_document import UserDocument
+from eeet2582_backend.api.models.document_table import DocumentTable
+from eeet2582_backend.api.models.table_row import TableRow
+from eeet2582_backend.api.models.row_cell import RowCell
 from docx.text.paragraph import Paragraph
+from docx.table import Table
 from docx.oxml.table import CT_Tbl
 from docx.oxml.text.paragraph import CT_P
 
