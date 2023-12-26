@@ -121,3 +121,15 @@ poetry run python manage.py createsuperuser
 ```bash 
 poetry run python manage.py runserver
 ```
+
+## run ngrok for Stripe webhook call
+1. After runing the server locally on port 8000
+2. download the ngrok.exe
+3. add authenticated token
+```bash
+ngrok config add-authtoken 2a1bssHACk98o1MV40hwaWna3TS_NpUqCqMpqfookK7DJaxb
+```
+4. run ngrok at reserved domain
+```bash
+ ngrok http --domain smiling-narwhal-remotely.ngrok-free.app 8000
+```

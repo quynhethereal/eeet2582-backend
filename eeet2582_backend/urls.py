@@ -14,14 +14,31 @@ Including another URLconf
     1. Import the include() function: from django.urls import include, path
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
-from django.contrib import admin
-from django.urls import path, include
-from .api import google_login
-from .api.parse_docx import ParseDocxAPIView
+from django.urls import path, re_path
+from drf_yasg.views import get_schema_view
+from drf_yasg import openapi
+from rest_framework import permissions
+
+from eeet2582_backend.api.views.parse_docx import ParseDocxAPIView
+from .api.views import google_login, payment, webhook
+
+schema_view = get_schema_view(
+   openapi.Info(
+      title="Group 1 ReadProof API",
+      default_version='v1',
+      description="UI",
+   ),
+   public=True,
+   permission_classes=([permissions.AllowAny]),
+)
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    # path("accounts/", include("allauth.urls")),  # new
+
+    re_path(r'^swagger(?P<format>\.json|\.yaml)$', schema_view.without_ui(cache_timeout=0), name='schema-json'),
+    path('swagger/', schema_view.with_ui('swagger', cache_timeout=0), name='schema-swagger-ui'),
+    path('redoc/', schema_view.with_ui('redoc', cache_timeout=0), name='schema-redoc'),
     path("login/google", google_login.GoogleSignIn.as_view()),
+    path("payment/create-checkout-session",  payment.StripeCheckoutView.as_view()),
+    path('payment/webhook', webhook.stripe_webhook, name='stripe_webhook'),
     path('api/parse-docx', ParseDocxAPIView.as_view()),
 ]
