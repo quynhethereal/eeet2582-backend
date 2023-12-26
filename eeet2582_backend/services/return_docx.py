@@ -1,6 +1,15 @@
 import os
 from docx import Document
-from eeet2582_backend.models import DocumentTitle, UserDocument, DocumentParagraph, Heading, EndNote, ListParagraph
+
+from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
+from eeet2582_backend.api.models.document_title import DocumentTitle
+from eeet2582_backend.api.models.endnote import EndNote
+from eeet2582_backend.api.models.heading import Heading
+from eeet2582_backend.api.models.list_paragraph import ListParagraph
+from eeet2582_backend.api.models.user_document import UserDocument
+from eeet2582_backend.api.models.document_table import DocumentTable
+from eeet2582_backend.api.models.table_row import TableRow
+from eeet2582_backend.api.models.row_cell import RowCell
 
 def create_docx():
     user_doc = UserDocument.objects.latest('created_at')
@@ -15,12 +24,15 @@ def create_docx():
     headings = Heading.objects.filter(user_document=user_doc)
     list_paragraphs = ListParagraph.objects.filter(user_document=user_doc)
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
+    tables = DocumentTable.objects.filter(user_document=user_doc)
 
     for para in paragraphs:
         related_headings = headings.filter(document_paragraph=para)
         related_list_paragraphs = list_paragraphs.filter(document_paragraph=para)
+        related_tables = tables.filter(document_paragraph=para)
         has_heading = related_headings.exists()
         has_list_paragraph = related_list_paragraphs.exists()
+        has_table = related_tables.exists()
         
         # Case both heading and list paragraph with paragraph (ID equal)
         if has_heading and has_list_paragraph:
@@ -29,6 +41,20 @@ def create_docx():
             doc.add_paragraph(para.content)
             for list_para in related_list_paragraphs:
                 doc.add_paragraph(list_para.content, style='List Bullet')
+        #Case both heading and table with paragraph (ID equal)
+        elif has_heading and has_table:
+            for heading in related_headings:
+                doc.add_heading(heading.content, level=1)
+            doc.add_paragraph(para.content)
+            for table in related_tables:
+                doc_table = doc.add_table(rows=0, cols=len(table.tablerow_set.first().rowcell_set.all()))
+                doc_table.style = 'Table Grid'
+                # Add the content from the table rows and cells
+                for row in table.tablerow_set.all():
+                    cells = row.rowcell_set.all()
+                    row_cells = doc_table.add_row().cells
+                    for idx, cell in enumerate(cells):
+                        row_cells[idx].text = cell.content
         # Case heading with paragraph (ID equal)
         elif has_heading:
             for heading in related_headings:
@@ -39,6 +65,19 @@ def create_docx():
             doc.add_paragraph(para.content)
             for list_para in related_list_paragraphs:
                 doc.add_paragraph(list_para.content, style='List Bullet')
+        #Case table with paragraph (ID equal)
+        elif has_table:
+            doc.add_paragraph(para.content)
+            for table in related_tables:
+                doc_table = doc.add_table(rows=0, cols=len(table.tablerow_set.first().rowcell_set.all()))
+                doc_table.style = 'Table Grid'
+                # Add the content from the table rows and cells
+                for row in table.tablerow_set.all():
+                    cells = row.rowcell_set.all()
+                    row_cells = doc_table.add_row().cells
+                    for idx, cell in enumerate(cells):
+                        row_cells[idx].text = cell.content
+
         # Case paragraph stand alone
         else:
             doc.add_paragraph(para.content)
