@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-c$)+36!u&6#6e9gs8^@8=lf$b6+i33dvon12vk7z8c113fb6d-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = ['smiling-narwhal-remotely.ngrok-free.app', '127.0.0.1']
+ALLOWED_HOSTS = ['smiling-narwhal-remotely.ngrok-free.app', '127.0.0.1', 'localhost']
 
 # Application definition
 
@@ -37,7 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     "rest_framework",
-    'eeet2582_backend.apps.Eeet2582Config',
+    "eeet2582_backend.apps.Eeet2582Config",
     'corsheaders',
     'drf_yasg',
 ]
@@ -127,9 +127,6 @@ REST_FRAMEWORK = {
     'DEFAULT_SCHEMA_CLASS': 'rest_framework.schemas.coreapi.AutoSchema'
 
 }
-
-
-
 
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
