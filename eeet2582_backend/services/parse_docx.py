@@ -10,6 +10,7 @@ from eeet2582_backend.api.models.endnote import EndNote
 from eeet2582_backend.api.models.heading import Heading
 from eeet2582_backend.api.models.list_paragraph import ListParagraph
 from eeet2582_backend.api.models.user_document import UserDocument
+from eeet2582_backend.api.models.subheading import Subheading
 from eeet2582_backend.api.models.document_table import DocumentTable
 from eeet2582_backend.api.models.table_row import TableRow
 from eeet2582_backend.api.models.row_cell import RowCell
@@ -30,7 +31,6 @@ class ParseDocxService:
         document_instance = None
         document_title = None
         current_paragraph = None
-        current_heading = None
 
         for element in document.element.body:
             # Case 1: Paragraph
@@ -54,10 +54,14 @@ class ParseDocxService:
                             headings_without_paragraphs = Heading.objects.filter(user_document=document_instance,
                                                                                  document_paragraph=None)
 
-                            # if current_heading and headings_without_paragraphs.exists():
-                            #
-                            # else:
-                            #     Heading.objects.create(user_document=document_instance, content=paragraph_content)
+                            if headings_without_paragraphs.exists():
+                                Subheading.objects.create(
+                                    heading=headings_without_paragraphs.first(),
+                                    content=paragraph_content,
+                                    type=paragraph.style.name)
+                                continue
+                            else:
+                                Heading.objects.create(user_document=document_instance, content=paragraph_content)
                             continue
 
                         if paragraph.style.name == 'List Paragraph':
