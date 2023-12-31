@@ -104,5 +104,5 @@ class ParseDocxService:
 
                         # Create a RowCell instance for each cell in the row
                         RowCell.objects.create(user_document=document_instance, document_table=document_table, table_row=table_row, content=cell_content)
-        create_docx()
-        return document_title
+        # create_docx()
+        return document_instance.id

@@ -11,6 +11,7 @@ from eeet2582_backend.api.models.document_table import DocumentTable
 from eeet2582_backend.api.models.table_row import TableRow
 from eeet2582_backend.api.models.row_cell import RowCell
 
+
 def create_docx():
     user_doc = UserDocument.objects.latest('created_at')
     # Create a new Word document
@@ -33,7 +34,7 @@ def create_docx():
         has_heading = related_headings.exists()
         has_list_paragraph = related_list_paragraphs.exists()
         has_table = related_tables.exists()
-        
+
         # Case both heading and list paragraph with paragraph (ID equal)
         if has_heading and has_list_paragraph:
             for heading in related_headings:
@@ -41,7 +42,7 @@ def create_docx():
             doc.add_paragraph(para.content)
             for list_para in related_list_paragraphs:
                 doc.add_paragraph(list_para.content, style='List Bullet')
-        #Case both heading and table with paragraph (ID equal)
+        # Case both heading and table with paragraph (ID equal)
         elif has_heading and has_table:
             for heading in related_headings:
                 doc.add_heading(heading.content, level=1)
@@ -65,7 +66,7 @@ def create_docx():
             doc.add_paragraph(para.content)
             for list_para in related_list_paragraphs:
                 doc.add_paragraph(list_para.content, style='List Bullet')
-        #Case table with paragraph (ID equal)
+        # Case table with paragraph (ID equal)
         elif has_table:
             doc.add_paragraph(para.content)
             for table in related_tables:
@@ -94,6 +95,6 @@ def create_docx():
     # Save the document
     # The filename is based on the document title;
     # Replace 'desired_path' with the actual path
-    filename = "".join([c for c in doc_title if c.isalpha() or c.isdigit() or c==' ']).rstrip()
-    save_path = f"output_docx/{filename}.docx"  
+    filename = "".join([c for c in doc_title if c.isalpha() or c.isdigit() or c == ' ']).rstrip()
+    save_path = f"output_docx/{filename}.docx"
     doc.save(save_path)
