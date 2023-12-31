@@ -122,6 +122,22 @@ poetry run python manage.py createsuperuser
 poetry run python manage.py runserver
 ```
 
+## Set up Celery for background tasks
+1. Install Redis
+```bash
+brew install redis
+```
+
+2. Start Redis
+```bash
+brew services start redis
+```
+
+3. Run Celery (in a new terminal)
+```bash
+celery -A eeet2582_backend worker --loglevel=info
+```
+
 ## run ngrok for Stripe webhook call
 1. After runing the server locally on port 8000
 2. download the ngrok.exe
