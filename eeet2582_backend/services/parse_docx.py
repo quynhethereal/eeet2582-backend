@@ -7,7 +7,7 @@ from eeet2582_backend.models import *
 from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
 from eeet2582_backend.api.models.document_title import DocumentTitle
 from eeet2582_backend.api.models.endnote import EndNote
-from eeet2582_backend.api.models.heading import Heading
+from eeet2582_backend.api.models.heading import Heading, Caption
 from eeet2582_backend.api.models.list_paragraph import ListParagraph
 from eeet2582_backend.api.models.user_document import UserDocument
 from eeet2582_backend.api.models.document_table import DocumentTable
@@ -109,6 +109,8 @@ class ParseDocxService:
                             else:
                                 current_paragraph = DocumentParagraph.objects.create(user_document=document_instance,
                                                                                      content=paragraph_content)
+                        if paragraph.style.name == 'Caption':
+                            Caption.objects.create(user_document = document_instance, document_paragraph = current_paragraph, content = paragraph_content)
 
                     if paragraph.style.name == 'EndNote Bibliography':
                         EndNote.objects.create(user_document=document_instance, content=paragraph_content)
@@ -133,7 +135,7 @@ class ParseDocxService:
 
                         # Create a RowCell instance for each cell in the row
                         RowCell.objects.create(user_document=document_instance, document_table=document_table, table_row=table_row, content=cell_content)
-            elif isinstance(element, CT_Picture):
+            elif isinstance(element, CT_Inline):
             # else:
                 print("image found 11")
                 # xmlstr = str(element.xml)
