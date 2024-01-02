@@ -8,7 +8,8 @@ from .return_docx import create_docx
 from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
 from eeet2582_backend.api.models.document_title import DocumentTitle
 from eeet2582_backend.api.models.endnote import EndNote
-from eeet2582_backend.api.models.heading import Heading, Caption
+from eeet2582_backend.api.models.heading import Heading
+from eeet2582_backend.api.models.caption import Caption
 from eeet2582_backend.api.models.list_paragraph import ListParagraph
 from eeet2582_backend.api.models.user_document import UserDocument
 from eeet2582_backend.api.models.subheading import Subheading
