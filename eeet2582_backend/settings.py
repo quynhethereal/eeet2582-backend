@@ -40,16 +40,17 @@ INSTALLED_APPS = [
     "eeet2582_backend.apps.Eeet2582Config",
     'corsheaders',
     'drf_yasg',
+    'django_celery_results'
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
-  "google": {
-    "SCOPE": [
-      "profile",
-      "email"
-    ],
-    "AUTH_PARAMS": {"access_type": "online"}
-  }
+    "google": {
+        "SCOPE": [
+            "profile",
+            "email"
+        ],
+        "AUTH_PARAMS": {"access_type": "online"}
+    }
 }
 
 MIDDLEWARE = [
@@ -60,7 +61,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    
+
 ]
 
 CORS_ALLOW_ALL_ORIGINS = True
@@ -158,7 +159,10 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 LOGIN_REDIRECT_URL = "home"
 ACCOUNT_LOGOUT_ON_GET = True
 
-STRIPE_WEBHOOK_SECRET="whsec_bLwcJhjiyjjECiJd0G6rhj40H7DWn8Ir"
-STRIPE_SECRET_KEY="sk_test_51OPyOTE2WWDOW84JHiEZ8gORgRhFci7J76jZMfTljyz9hRqutP06hvdSwAVwsrrX9ClBO3W8dil3Ur96g3NN3Lay00iQXUtx38"
-STRIPE_3MONTH_PRICE_ID="price_1OQTxQE2WWDOW84JhtZPjyp5"
+STRIPE_WEBHOOK_SECRET = "whsec_bLwcJhjiyjjECiJd0G6rhj40H7DWn8Ir"
+STRIPE_SECRET_KEY = "sk_test_51OPyOTE2WWDOW84JHiEZ8gORgRhFci7J76jZMfTljyz9hRqutP06hvdSwAVwsrrX9ClBO3W8dil3Ur96g3NN3Lay00iQXUtx38"
+STRIPE_3MONTH_PRICE_ID = "price_1OQTxQE2WWDOW84JhtZPjyp5"
 FRONT_END_DOMAIN = "http://localhost:5173/"
+
+CELERY_BROKER_URL = "redis://localhost:6379"
+CELERY_RESULT_BACKEND = 'django-db'

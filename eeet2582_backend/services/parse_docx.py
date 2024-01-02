@@ -3,6 +3,7 @@ from docx.document import Document as doctwo
 import re
 
 from eeet2582_backend.models import *
+from .return_docx import create_docx
 
 from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
 from eeet2582_backend.api.models.document_title import DocumentTitle
@@ -10,6 +11,7 @@ from eeet2582_backend.api.models.endnote import EndNote
 from eeet2582_backend.api.models.heading import Heading, Caption
 from eeet2582_backend.api.models.list_paragraph import ListParagraph
 from eeet2582_backend.api.models.user_document import UserDocument
+from eeet2582_backend.api.models.subheading import Subheading
 from eeet2582_backend.api.models.document_table import DocumentTable
 from eeet2582_backend.api.models.table_row import TableRow
 from eeet2582_backend.api.models.row_cell import RowCell
@@ -70,22 +72,33 @@ class ParseDocxService:
 
                     document_instance = UserDocument.objects.create(document_title=document_title)
                     continue
-                    # return document_instance
 
                 elif document_instance:
                     paragraph_content = paragraph.text.strip()
 
                     if paragraph_content:
+                        # check if the paragraph is a heading
                         if re.match(self.heading_pattern, paragraph.style.name):
-                            Heading.objects.create(user_document=document_instance, content=paragraph_content)
 
-                            # import pdb; pdb.set_trace()
+                            # handle subheadings
+                            headings_without_paragraphs = Heading.objects.filter(user_document=document_instance,
+                                                                                 document_paragraph=None)
+
+                            if headings_without_paragraphs.exists():
+                                Subheading.objects.create(
+                                    heading=headings_without_paragraphs.first(),
+                                    content=paragraph_content,
+                                    type=paragraph.style.name)
+                                continue
+                            else:
+                                Heading.objects.create(user_document=document_instance, content=paragraph_content)
                             continue
 
                         if paragraph.style.name == 'List Paragraph':
                             # if there is no current paragraph, then we get the last paragraph
                             if not current_paragraph:
-                                current_paragraph = DocumentParagraph.objects.filter(user_document=document_instance).last()
+                                current_paragraph = DocumentParagraph.objects.filter(
+                                    user_document=document_instance).last()
                                 continue
 
                             ListParagraph.objects.create(user_document=document_instance,
@@ -100,7 +113,8 @@ class ParseDocxService:
 
                             if headings_without_paragraphs.exists():
                                 orphan_heading = headings_without_paragraphs.first()
-                                # if there is a heading without a paragraph, then we assign the paragraph to that heading
+                                # if there is a heading without a paragraph, then we assign the paragraph to that
+                                # heading
                                 current_paragraph = DocumentParagraph.objects.create(
                                     user_document=document_instance, content=paragraph_content)
 
@@ -116,18 +130,19 @@ class ParseDocxService:
                         EndNote.objects.create(user_document=document_instance, content=paragraph_content)
                         continue
             elif isinstance(element, CT_Tbl):
-                print("Table")
                 if document_instance is None:
                     continue  # Or handle the case where no document_instance is found
                 # Create a DocumentTable instance for each table in the document
                 table = Table(element, document)
                 if current_paragraph:
-                    document_table = DocumentTable.objects.create(user_document=document_instance, document_paragraph=current_paragraph, content="")
+                    document_table = DocumentTable.objects.create(user_document=document_instance,
+                                                                  document_paragraph=current_paragraph, content="")
                 else:
                     document_table = DocumentTable.objects.create(user_document=document_instance, content="")
                 for i, row in enumerate(table.rows):
                     # Create a TableRow instance for each row in the table
-                    table_row = TableRow.objects.create(user_document=document_instance, document_table=document_table, content="")
+                    table_row = TableRow.objects.create(user_document=document_instance, document_table=document_table,
+                                                        content="")
 
                     for cell in row.cells:
                         # Extract content from each cell
@@ -151,5 +166,6 @@ class ParseDocxService:
                 #     image = Image.open(BytesIO(image_data))
                 #     image.save(f"extracted_image{image_no}.png")
                 #     image_no = image_no + 1
-
-        return document_title
+        #Testing the return_docx.py
+        create_docx()
+        return document_instance.id
