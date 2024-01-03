@@ -21,6 +21,7 @@ from rest_framework import permissions
 
 from eeet2582_backend.api.views.parse_docx import ParseDocxAPIView
 from .api.views import google_login, payment, webhook
+from .api.views.task_status import TaskStatusAPIView
 
 schema_view = get_schema_view(
    openapi.Info(
@@ -40,4 +41,5 @@ urlpatterns = [
     path("payment/create-checkout-session",  payment.StripeCheckoutView.as_view()),
     path('payment/webhook', webhook.stripe_webhook, name='stripe_webhook'),
     path('api/parse-docx', ParseDocxAPIView.as_view()),
+    path('api/task-status/<str:task_id>', TaskStatusAPIView.as_view(), name='task_status'),
 ]

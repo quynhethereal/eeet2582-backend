@@ -10,7 +10,6 @@ from eeet2582_backend.celery import app
 
 
 class ParseDocxAPIView(APIView):
-    # TODO: Enable authentication and permissions
     authentication_classes = [GoogleOAuth2Authentication]
 
     # permission_classes = []
