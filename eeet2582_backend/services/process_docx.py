@@ -20,7 +20,7 @@ nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
 
 def correct_text(text):
-    api_endpoint = "https://your-api-endpoint.com/correct_text"
+    api_endpoint = "https://polite-horribly-cub.ngrok-free.app/generate_code"
     params = {
         'prompts': f'Correct English:{text} Here is the corrected version:'
     }
@@ -34,23 +34,15 @@ def process_paragraph(user_doc):
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
 
     paragraph=paragraphs[7]
-    response = correct_text(paragraph.content)
-    if response.status_code == 200:
-        corrected_text = response.json()[0].strip()
-        print(corrected_text)
-        # paragraph.content = corrected_text
-        # paragraph.save()
-    else:
-        print("Error: ", response.status_code)
+    sentences = sent_tokenize(paragraph.content)
 
-    # for paragraph in paragraphs:
-    #     response = correct_text(paragraph.content)
-    #     if response.status_code == 200:
-    #         corrected_text = response.json()[0].strip()
-    #         print(corrected_text)
-    #         # paragraph.content = corrected_text
-    #         # paragraph.save()
-    #     else:
-    #         print("Error: ", response.status_code)
+    for sentence in sentences:
+        print(sentence)
+        response = correct_text(sentence)
+        if response.status_code == 200:
+            corrected_text = response.json()[0].strip()
+            print(corrected_text)
+        else:
+            print("Error: ", response.status_code)
 
 process_docx()
