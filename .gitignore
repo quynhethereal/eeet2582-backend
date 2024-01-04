@@ -5,3 +5,4 @@ db.sqlite3
 *.env
 .vscode
 .tool-versions
+poetry.lock
