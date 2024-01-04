@@ -33,16 +33,38 @@ def process_docx():
 def process_paragraph(user_doc):
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
 
-    paragraph=paragraphs[7]
-    sentences = sent_tokenize(paragraph.content)
+    paragraph = paragraphs[7]
+    if paragraph.content:
+        corrected_paragraph = ""
+        sentences = sent_tokenize(paragraph.content)
+        
+        for sentence in sentences:
+            # print(sentence)
+            response = correct_text(sentence)
+            if response.status_code == 200:
+                corrected_text = response.json()[0].strip()
+                # print(corrected_text)
+                corrected_paragraph += corrected_text + " "
+            else:
+                print("Error: ", response.status_code)
+        print(corrected_paragraph)
 
-    for sentence in sentences:
-        print(sentence)
-        response = correct_text(sentence)
-        if response.status_code == 200:
-            corrected_text = response.json()[0].strip()
-            print(corrected_text)
-        else:
-            print("Error: ", response.status_code)
+    # for paragraph in paragraphs:
+    #     if paragraph.content:
+    #         corrected_paragraph = ""
+    #         sentences = sent_tokenize(paragraph.content)
+
+    #         for sentence in sentences:
+    #             # print(sentence)
+    #             response = correct_text(sentence)
+    #             if response.status_code == 200:
+    #                 corrected_text = response.json()[0].strip()
+    #                 # print(corrected_text)
+    #                 corrected_paragraph += corrected_text + " "
+    #             else:
+    #                 print("Error: ", response.status_code)
+    #         # print(corrected_paragraph)
+    #         paragraph.content = corrected_paragraph
+    #         paragraph.save()
 
 process_docx()
