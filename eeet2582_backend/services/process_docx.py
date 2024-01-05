@@ -2,7 +2,6 @@ import os
 import requests
 import django
 import nltk
-from celery import shared_task
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eeet2582_backend.settings')
 django.setup()
@@ -21,7 +20,7 @@ from eeet2582_backend.celery import app
 nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
 
-@shared_task
+@app.task
 def correct_text(text):
     api_endpoint = "https://polite-horribly-cub.ngrok-free.app/generate_code"
     params = {
@@ -33,7 +32,7 @@ def correct_text(text):
     else:
         return text;
 
-@shared_task
+@app.task
 def correct_text_paragraph(paragraph_id):
     paragraph = DocumentParagraph.objects.get(id=paragraph_id)
     if paragraph.content:
