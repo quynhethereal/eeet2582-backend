@@ -19,7 +19,6 @@ from eeet2582_backend.celery import app
 
 from celery import chord
 
-@app.task
 def correct_text(text):
     api_endpoint = "https://polite-horribly-cub.ngrok-free.app/generate_code"
     params = {
@@ -36,26 +35,19 @@ def correct_text(text):
 @app.task
 def correct_text_paragraph(paragraph_id):
     paragraph = DocumentParagraph.objects.get(id=paragraph_id)
+    paragraph_result = DocumentParagraphResult.objects.create(original_paragraph=paragraph)
     if paragraph.content:
         # print(paragraph.content)
-        result = correct_text.apply_async(args=[paragraph.content], link=correct_text_paragraph_callback.s(paragraph_id))
-        # result = correct_text.apply_async([paragraph.content])
+        result = correct_text(paragraph.content)
+        paragraph_result.content = result
+        paragraph_result.save()
         return result
-
-@app.task
-def correct_text_paragraph_callback(content, paragraph_id):
-    paragraph = DocumentParagraph.objects.get(id=paragraph_id)
-    paragraph_result = DocumentParagraphResult.objects.create(original_paragraph=paragraph)
-    paragraph_result.content = content
-    paragraph_result.save()
 
 @app.task
 def process_paragraph():
     user_doc = UserDocument.objects.latest('created_at')
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
-
     result = chord(correct_text_paragraph.s(paragraph.id) for paragraph in paragraphs)(process_paragraph_callback.s())
-
     return result
 
 @app.task
