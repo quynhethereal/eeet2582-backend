@@ -39,33 +39,39 @@ def correct_text(text):
 def correct_text_paragraph(paragraph_id):
     paragraph = DocumentParagraph.objects.get(id=paragraph_id)
     if paragraph.content:
-        corrected_paragraph = ""
+        # print(paragraph.content)
         sentences = sent_tokenize(paragraph.content)
-        result = chord(correct_text.s(sentence) for sentence in sentences)(combine_sentences.s())
+        result = chord(correct_text.s(sentence) for sentence in sentences)(combine_sentences.s(paragraph_id))
         return result
-        # paragraph.content = corrected_paragraph
-        # paragraph.save()
 
 @app.task
-def combine_sentences(sentences):
-    print(sentences)
+def combine_sentences(sentences, paragraph_id):
+    paragraph = DocumentParagraph.objects.get(id=paragraph_id)
     combined = ""
     for sentence in sentences:
         combined += sentence + " "
+    paragraph.content = combined
+    paragraph.save()
+    print('saved paragraph')
     return combined
 
 @app.task
-def process_paragraph(user_doc):
+def process_paragraph():
+    user_doc = UserDocument.objects.latest('created_at')
+
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
 
-    for paragraph in paragraphs:
-        correct_text_paragraph.apply_async(paragraph.id)
-
+    result = chord(correct_text_paragraph.s(paragraph.id) for paragraph in paragraphs)(process_paragraph_callback.s())
+    return result
 
 @app.task
 def process_docx():
-    user_doc = UserDocument.objects.latest('created_at')
-    process_paragraph(user_doc)
+    result = process_paragraph.apply_async()
+    return result
+
+@app.task
+def process_paragraph_callback(results):
+    return results
 
 
 def process_docx_old():
