@@ -17,8 +17,9 @@ from eeet2582_backend.api.models.table_row import TableRow
 from eeet2582_backend.api.models.row_cell import RowCell
 from eeet2582_backend.celery import app
 
-nltk.download('punkt')
+# nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
+
 
 @app.task
 def correct_text(text):
@@ -27,10 +28,10 @@ def correct_text(text):
         'prompts': f'Correct English:{text} Here is the corrected version:'
     }
     response = requests.get(api_endpoint, params=params)
-    if(response.status_code == 200):
-        return response.json()[0].strip()
-    else:
-        return text;
+
+    print(response.json())
+    return response.json()
+
 
 @app.task
 def correct_text_paragraph(paragraph_id):
@@ -43,16 +44,19 @@ def correct_text_paragraph(paragraph_id):
         paragraph.content = corrected_paragraph
         paragraph.save()
 
+
 def process_paragraph(user_doc):
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
 
     for paragraph in paragraphs:
         correct_text_paragraph.delay(paragraph.id)
 
+
 @app.task
 def process_docx():
     user_doc = UserDocument.objects.latest('created_at')
     process_paragraph(user_doc)
+
 
 def process_docx_old():
     user_doc = UserDocument.objects.latest('created_at')
@@ -61,6 +65,7 @@ def process_docx_old():
     process_heading(user_doc)
     process_endnote(user_doc)
 
+
 def process_title(user_doc):
     titles = DocumentTitle.objects.filter(userdocument=user_doc).order_by('id')
 
@@ -68,6 +73,7 @@ def process_title(user_doc):
         if title.title:
             title.title = correct_text(title.title)
             title.save()
+
 
 def process_paragraph_old(user_doc):
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
@@ -83,7 +89,8 @@ def process_paragraph_old(user_doc):
                 # print(corrected_paragraph)
             paragraph.content = corrected_paragraph
             paragraph.save()
-    
+
+
 def process_heading(user_doc):
     headings = Heading.objects.filter(user_document=user_doc).order_by('id')
 
@@ -97,6 +104,7 @@ def process_heading(user_doc):
             heading.content = corrected_heading
             heading.save()
 
+
 def process_endnote(user_doc):
     endnotes = EndNote.objects.filter(user_document=user_doc).order_by('id')
 
@@ -104,5 +112,3 @@ def process_endnote(user_doc):
         if endnote.content:
             endnote.content = correct_text(endnote.content)
             endnote.save()
-            
-process_docx_old()
