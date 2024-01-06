@@ -7,17 +7,10 @@ django.setup()
 
 from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
 from eeet2582_backend.api.models.document_paragraph_result import DocumentParagraphResult
-from eeet2582_backend.api.models.document_title import DocumentTitle
-from eeet2582_backend.api.models.endnote import EndNote
-from eeet2582_backend.api.models.heading import Heading
-from eeet2582_backend.api.models.list_paragraph import ListParagraph
 from eeet2582_backend.api.models.user_document import UserDocument
-from eeet2582_backend.api.models.document_table import DocumentTable
-from eeet2582_backend.api.models.table_row import TableRow
-from eeet2582_backend.api.models.row_cell import RowCell
 from eeet2582_backend.celery import app
 
-from celery import chord
+from celery import chord , group
 
 def correct_text(text):
     api_endpoint = "https://polite-horribly-cub.ngrok-free.app/generate_code"
@@ -47,7 +40,10 @@ def correct_text_paragraph(paragraph_id):
 def process_paragraph():
     user_doc = UserDocument.objects.latest('created_at')
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
-    result = chord(correct_text_paragraph.s(paragraph.id) for paragraph in paragraphs)(process_paragraph_callback.s())
+
+    # result = chord(correct_text_paragraph.s(paragraph.id) for paragraph in paragraphs)
+
+    result = group(correct_text_paragraph.s(paragraph.id) for paragraph in paragraphs).apply_async()
     return result
 
 @app.task
@@ -55,62 +51,15 @@ def process_docx():
     result = process_paragraph.apply_async()
     return result
 
-@app.task
-def process_paragraph_callback(results):
-    return results
-
-
 def process_docx_old():
     user_doc = UserDocument.objects.latest('created_at')
-    process_title(user_doc)
     process_paragraph_old(user_doc)
-    process_heading(user_doc)
-    process_endnote(user_doc)
-
-
-def process_title(user_doc):
-    titles = DocumentTitle.objects.filter(userdocument=user_doc).order_by('id')
-
-    for title in titles:
-        if title.title:
-            title.title = correct_text(title.title)
-            title.save()
-
 
 def process_paragraph_old(user_doc):
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
+    paragraph_result = DocumentParagraphResult.objects.create(original_paragraph=paragraph)
 
     for paragraph in paragraphs:
         if paragraph.content:
-            corrected_paragraph = ""
-            sentences = sent_tokenize(paragraph.content)
-
-            for sentence in sentences:
-                # print(sentence)
-                corrected_paragraph += correct_text(sentence) + " "
-                # print(corrected_paragraph)
-            paragraph.content = corrected_paragraph
-            paragraph.save()
-
-
-def process_heading(user_doc):
-    headings = Heading.objects.filter(user_document=user_doc).order_by('id')
-
-    for heading in headings:
-        if heading.content:
-            corrected_heading = ""
-            sentences = sent_tokenize(heading.content)
-
-            for sentence in sentences:
-                corrected_heading += correct_text(sentence) + " "
-            heading.content = corrected_heading
-            heading.save()
-
-
-def process_endnote(user_doc):
-    endnotes = EndNote.objects.filter(user_document=user_doc).order_by('id')
-
-    for endnote in endnotes:
-        if endnote.content:
-            endnote.content = correct_text(endnote.content)
-            endnote.save()
+            paragraph_result.content = correct_text(paragraph.content)
+            paragraph_result.save()
