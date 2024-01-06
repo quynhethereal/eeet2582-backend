@@ -13,15 +13,17 @@ from eeet2582_backend.celery import app
 from celery import chord , group
 
 def correct_text(text):
+    endswithcolon = not text.endswith('.') or not text.endswith('?') or not text.endswith('!')
+
     api_endpoint = "https://polite-horribly-cub.ngrok-free.app/generate_code"
     params = {
-        'prompts': f'Correct English:{text}Here is the corrected version no explaination:',
+        'prompts': f'Correct English:{text+'.' if endswithcolon else text}Here is the corrected version no explaination:',
         'max_length': len(text)
     }
-    response = requests.get(api_endpoint, params=params)
 
+    response = requests.get(api_endpoint, params=params)
     if response.status_code == 200:
-        return response.json()[0].strip()
+        return response.json()[0].strip()[:-1] if endswithcolon else response.json()[0].strip()
     else:
         return text
     
