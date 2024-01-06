@@ -16,6 +16,6 @@ class ProcessDocxAPIView(APIView):
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
-        task_id = correct_text.apply_async(args=['Hello World'])
+        task_id = correct_text.apply_async(args=['Hello World.'])
 
         return Response({"task_id": task_id.id}, status=status.HTTP_202_ACCEPTED)

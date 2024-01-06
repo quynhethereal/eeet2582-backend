@@ -29,9 +29,10 @@ def correct_text(text):
     }
     response = requests.get(api_endpoint, params=params)
 
-    print(response.json())
-    return response.json()
-
+    if response.status_code == 200:
+        return response.json()[0].strip()
+    else:
+        return text
 
 @app.task
 def correct_text_paragraph(paragraph_id):
