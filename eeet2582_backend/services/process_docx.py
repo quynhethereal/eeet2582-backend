@@ -1,12 +1,12 @@
 import os
 import requests
 import django
-import nltk
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eeet2582_backend.settings')
 django.setup()
 
 from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
+from eeet2582_backend.api.models.document_paragraph_result import DocumentParagraphResult
 from eeet2582_backend.api.models.document_title import DocumentTitle
 from eeet2582_backend.api.models.endnote import EndNote
 from eeet2582_backend.api.models.heading import Heading
@@ -19,14 +19,12 @@ from eeet2582_backend.celery import app
 
 from celery import chord
 
-# nltk.download('punkt')
-from nltk.tokenize import sent_tokenize
-
 @app.task
 def correct_text(text):
     api_endpoint = "https://polite-horribly-cub.ngrok-free.app/generate_code"
     params = {
-        'prompts': f'Correct English:{text}Here is the corrected version:'
+        'prompts': f'Correct English:{text}Here is the corrected version no explaination:',
+        'max_length': len(text)
     }
     response = requests.get(api_endpoint, params=params)
 
@@ -34,34 +32,30 @@ def correct_text(text):
         return response.json()[0].strip()
     else:
         return text
-
+    
 @app.task
 def correct_text_paragraph(paragraph_id):
     paragraph = DocumentParagraph.objects.get(id=paragraph_id)
     if paragraph.content:
         # print(paragraph.content)
-        sentences = sent_tokenize(paragraph.content)
-        result = chord(correct_text.s(sentence) for sentence in sentences)(combine_sentences.s(paragraph_id))
+        result = correct_text.apply_async(args=[paragraph.content], link=correct_text_paragraph_callback.s(paragraph_id))
+        # result = correct_text.apply_async([paragraph.content])
         return result
 
 @app.task
-def combine_sentences(sentences, paragraph_id):
+def correct_text_paragraph_callback(content, paragraph_id):
     paragraph = DocumentParagraph.objects.get(id=paragraph_id)
-    combined = ""
-    for sentence in sentences:
-        combined += sentence + " "
-    paragraph.content = combined
-    paragraph.save()
-    print('saved paragraph')
-    return combined
+    paragraph_result = DocumentParagraphResult.objects.create(original_paragraph=paragraph)
+    paragraph_result.content = content
+    paragraph_result.save()
 
 @app.task
 def process_paragraph():
     user_doc = UserDocument.objects.latest('created_at')
-
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
 
     result = chord(correct_text_paragraph.s(paragraph.id) for paragraph in paragraphs)(process_paragraph_callback.s())
+
     return result
 
 @app.task
