@@ -7,7 +7,7 @@ from rest_framework import status
 from eeet2582_backend.authentication.authentication import GoogleOAuth2Authentication
 from eeet2582_backend.services.parse_docx import ParseDocxService
 from eeet2582_backend.celery import app
-from eeet2582_backend.services.process_docx import correct_text
+from eeet2582_backend.services.process_docx import correct_text_paragraph
 
 
 class ProcessDocxAPIView(APIView):
@@ -16,6 +16,6 @@ class ProcessDocxAPIView(APIView):
     permission_classes = []
 
     def post(self, request, *args, **kwargs):
-        task_id = correct_text.apply_async(args=['Hello World.'])
+        task_id = correct_text_paragraph.apply_async([2])
 
         return Response({"task_id": task_id.id}, status=status.HTTP_202_ACCEPTED)

@@ -17,15 +17,16 @@ from eeet2582_backend.api.models.table_row import TableRow
 from eeet2582_backend.api.models.row_cell import RowCell
 from eeet2582_backend.celery import app
 
+from celery import chord
+
 # nltk.download('punkt')
 from nltk.tokenize import sent_tokenize
-
 
 @app.task
 def correct_text(text):
     api_endpoint = "https://polite-horribly-cub.ngrok-free.app/generate_code"
     params = {
-        'prompts': f'Correct English:{text} Here is the corrected version:'
+        'prompts': f'Correct English:{text}Here is the corrected version:'
     }
     response = requests.get(api_endpoint, params=params)
 
@@ -40,17 +41,25 @@ def correct_text_paragraph(paragraph_id):
     if paragraph.content:
         corrected_paragraph = ""
         sentences = sent_tokenize(paragraph.content)
-        for sentence in sentences:
-            corrected_paragraph += correct_text.delay(sentence) + " "
-        paragraph.content = corrected_paragraph
-        paragraph.save()
+        result = chord(correct_text.s(sentence) for sentence in sentences)(combine_sentences.s())
+        return result
+        # paragraph.content = corrected_paragraph
+        # paragraph.save()
 
+@app.task
+def combine_sentences(sentences):
+    print(sentences)
+    combined = ""
+    for sentence in sentences:
+        combined += sentence + " "
+    return combined
 
+@app.task
 def process_paragraph(user_doc):
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
 
     for paragraph in paragraphs:
-        correct_text_paragraph.delay(paragraph.id)
+        correct_text_paragraph.apply_async(paragraph.id)
 
 
 @app.task
