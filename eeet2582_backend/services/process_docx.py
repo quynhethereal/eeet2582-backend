@@ -1,19 +1,15 @@
-import os
+import re
 import requests
-import django
-
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'eeet2582_backend.settings')
-django.setup()
+from celery import group
 
 from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
 from eeet2582_backend.api.models.document_paragraph_result import DocumentParagraphResult
 from eeet2582_backend.api.models.user_document import UserDocument
 from eeet2582_backend.celery import app
 
-from celery import chord , group
-
 def correct_text(text):
     endswithcolon = not text.endswith('.') or not text.endswith('?') or not text.endswith('!')
+    text = re.sub(' +', ' ', text) # remove extra spaces
 
     api_endpoint = "https://polite-horribly-cub.ngrok-free.app/generate_code"
     params = {
@@ -23,7 +19,11 @@ def correct_text(text):
 
     response = requests.get(api_endpoint, params=params)
     if response.status_code == 200:
-        return response.json()[0].strip()[:-1] if endswithcolon else response.json()[0].strip()
+        result = response.json()[0].strip()[:-1] if endswithcolon else response.json()[0].strip()
+        result = re.sub('Correct English: ', '', result)
+        result = re.sub(' +', ' ', result)
+        result = re.sub('\n', '', result)
+        return result
     else:
         return text
     
@@ -42,9 +42,6 @@ def correct_text_paragraph(paragraph_id):
 def process_paragraph():
     user_doc = UserDocument.objects.latest('created_at')
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
-
-    # result = chord(correct_text_paragraph.s(paragraph.id) for paragraph in paragraphs)
-
     result = group(correct_text_paragraph.s(paragraph.id) for paragraph in paragraphs).apply_async()
     return result
 
