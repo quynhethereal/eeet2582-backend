@@ -25,9 +25,7 @@ def correct_text(text):
             return text
         
         # format the corrected text
-        if not endsproperly:
-            result = result[:-1]
-
+        result = result if endsproperly else result[:-1]
         result = re.sub('Correct English: ', '', result)
         result = re.sub(' +', ' ', result)
         result = re.sub('\n', '', result)
