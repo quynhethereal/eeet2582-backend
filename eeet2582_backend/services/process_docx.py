@@ -8,18 +8,26 @@ from eeet2582_backend.api.models.user_document import UserDocument
 from eeet2582_backend.celery import app
 
 def correct_text(text):
-    endswithcolon = not text.endswith('.') or not text.endswith('?') or not text.endswith('!')
     text = re.sub(' +', ' ', text) # remove extra spaces
+    endsproperly = text.endswith('.') or text.endswith('?') or text.endswith('!')
 
     api_endpoint = "https://polite-horribly-cub.ngrok-free.app/generate_code"
     params = {
-        'prompts': f'Correct English:{text+'.' if endswithcolon else text}Here is the corrected version no explaination:',
+        'prompts': f'Correct English:{text if endsproperly else text+'.'}Here is the corrected version no explaination:',
         'max_length': len(text)
     }
 
     response = requests.get(api_endpoint, params=params)
     if response.status_code == 200:
-        result = response.json()[0].strip()[:-1] if endswithcolon else response.json()[0].strip()
+        result = response.json()[0]
+        # return orignal text if no correction is made
+        if 'I need help with the following sentence:' in result:
+            return text
+        
+        # format the corrected text
+        if not endsproperly:
+            result = result[:-1]
+
         result = re.sub('Correct English: ', '', result)
         result = re.sub(' +', ' ', result)
         result = re.sub('\n', '', result)
