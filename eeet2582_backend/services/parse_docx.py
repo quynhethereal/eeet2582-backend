@@ -48,28 +48,6 @@ class ParseDocxService:
             if isinstance(element, CT_P):
                 paragraph = Paragraph(element, document)
 
-                for run in paragraph.runs:
-                    xmlstr = str(run.element.xml)
-                    my_namespaces = dict([node for _, node in ElementTree.iterparse(StringIO(xmlstr), events=['start-ns'])])
-                    root = ET.fromstring(xmlstr) 
-                    #Check if pic is there in the xml of the element. If yes, then extract the image data
-                    if 'pic:pic' in xmlstr:
-                        print("ImageFound")
-                        for pic in root.findall('.//pic:pic', my_namespaces):
-                            print("ImageFound 2")
-                            cNvPr_elem = pic.find("pic:nvPicPr/pic:cNvPr", my_namespaces)
-                            name_attr = cNvPr_elem.get("name")
-                            blip_elem = pic.find("pic:blipFill/a:blip", my_namespaces)
-                            embed_attr = blip_elem.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed")  
-                            document_part = document.part
-                            image_part = document_part.related_parts[embed_attr]
-                            image_base64 = base64.b64encode(image_part._blob)
-                            image_base64 = image_base64.decode()     
-                            if not current_paragraph:    
-                                DocumentImage.objects.create(user_document=document_instance, document_paragraph=None, file_name=name_attr,  content=image_base64)
-                            elif current_paragraph:     
-                                DocumentImage.objects.create(user_document=document_instance, document_paragraph=current_paragraph, file_name=name_attr,  content=image_base64)    
-                            imagecounter = imagecounter + 1
                 if paragraph.text.strip() and not document_title:
                     document_title = DocumentTitle.objects.create(title=paragraph.text)
 
@@ -81,7 +59,7 @@ class ParseDocxService:
 
                     if paragraph_content:
                         # check if the paragraph is a heading
-                        if re.match(self.heading_pattern, paragraph.style.name):
+                        if re.match(self.heading_pattern, paragraph.style.name)
 
                             # handle subheadings
                             headings_without_paragraphs = Heading.objects.filter(user_document=document_instance,
@@ -132,6 +110,28 @@ class ParseDocxService:
                     if paragraph.style.name == 'EndNote Bibliography':
                         EndNote.objects.create(user_document=document_instance, content=paragraph_content)
                         continue
+                for run in paragraph.runs:
+                    xmlstr = str(run.element.xml)
+                    my_namespaces = dict([node for _, node in ElementTree.iterparse(StringIO(xmlstr), events=['start-ns'])])
+                    root = ET.fromstring(xmlstr) 
+                    #Check if pic is there in the xml of the element. If yes, then extract the image data
+                    if 'pic:pic' in xmlstr:
+                        print("ImageFound")
+                        for pic in root.findall('.//pic:pic', my_namespaces):
+                            print("ImageFound 2")
+                            cNvPr_elem = pic.find("pic:nvPicPr/pic:cNvPr", my_namespaces)
+                            name_attr = cNvPr_elem.get("name")
+                            blip_elem = pic.find("pic:blipFill/a:blip", my_namespaces)
+                            embed_attr = blip_elem.get("{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed")  
+                            document_part = document.part
+                            image_part = document_part.related_parts[embed_attr]
+                            image_base64 = base64.b64encode(image_part._blob)
+                            image_base64 = image_base64.decode()     
+                            if not current_paragraph:    
+                                DocumentImage.objects.create(user_document=document_instance, document_paragraph=None, file_name=name_attr,  content=image_base64)
+                            elif current_paragraph:     
+                                DocumentImage.objects.create(user_document=document_instance, document_paragraph=current_paragraph, file_name=name_attr,  content=image_base64)    
+                            imagecounter = imagecounter + 1
             elif isinstance(element, CT_Tbl):
                 if document_instance is None:
                     continue  # Or handle the case where no document_instance is found

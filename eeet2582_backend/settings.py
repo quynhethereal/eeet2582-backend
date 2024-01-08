@@ -10,6 +10,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 from pathlib import Path
 import environ
+import os
 
 env = environ.Env()
 environ.Env.read_env()
@@ -40,7 +41,8 @@ INSTALLED_APPS = [
     "eeet2582_backend.apps.Eeet2582Config",
     'corsheaders',
     'drf_yasg',
-    'django_celery_results'
+    'django_celery_results',
+    'storages'
 ]
 
 SOCIALACCOUNT_PROVIDERS = {
@@ -144,6 +146,13 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
 STATIC_URL = 'static/'
+MEDIA_URL = 'files/'
+
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
+
+MEDIA_ROOT = os.path.join(BASE_DIR, 'static/files')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -166,3 +175,12 @@ FRONT_END_DOMAIN = "http://localhost:5173/"
 
 CELERY_BROKER_URL = "redis://localhost:6379"
 CELERY_RESULT_BACKEND = 'django-db'
+
+#S3 BUCKETS CONFIG
+AWS_ACCESS_KEY_ID = 'AKIASU7NEA7EYYKTRHNG'
+AWS_SECRET_ACCESS_KEY = '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'
+AWS_STORAGE_BUCKET_NAME = 'group1-bucket'
+AWS_S3_FILE_OVERWRITE = False  # (optional: default is True) Set to False if you want to have extra characters appended.
+AWS_DEFAULT_ACL = None  # (optional; default is None) which means the file will inherit the bucket’s permission
+DEFAULT_FILE_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
+STATICFILES_STORAGE = 'storages.backends.s3boto3.S3Boto3Storage'
