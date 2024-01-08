@@ -20,15 +20,17 @@ def correct_text(text):
     response = requests.get(api_endpoint, params=params)
     if response.status_code == 200:
         result = response.json()[0]
-        # return orignal text if no correction is made
-        if 'I need help with the following sentence:' in result:
-            return text
         
         # format the corrected text
-        result = result if endsproperly else result[:-1]
         result = re.sub('Correct English: ', '', result)
         result = re.sub(' +', ' ', result)
         result = re.sub('\n', '', result)
+        result = result if endsproperly else result[:-1]
+
+        # return orignal text if the correction is too different
+        if(abs(len(result) - len(text)) > 10):
+            return text
+
         return result
     else:
         return text
