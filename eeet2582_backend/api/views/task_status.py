@@ -8,7 +8,7 @@ from eeet2582_backend.celery import app
 
 
 class TaskStatusAPIView(APIView):
-    authentication_classes = [GoogleOAuth2Authentication]
+    authentication_classes = []
     permission_classes = []
 
     def get(self, request, *args, **kwargs):

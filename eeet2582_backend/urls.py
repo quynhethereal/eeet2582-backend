@@ -20,6 +20,7 @@ from drf_yasg import openapi
 from rest_framework import permissions
 
 from eeet2582_backend.api.views.parse_docx import ParseDocxAPIView
+from eeet2582_backend.api.views.process_docx import ProcessDocxAPIView
 from .api.views import google_login, payment, webhook
 from .api.views.task_status import TaskStatusAPIView
 
@@ -42,4 +43,5 @@ urlpatterns = [
     path('payment/webhook', webhook.stripe_webhook, name='stripe_webhook'),
     path('api/parse-docx', ParseDocxAPIView.as_view()),
     path('api/task-status/<str:task_id>', TaskStatusAPIView.as_view(), name='task_status'),
+    path('api/process-docx', ProcessDocxAPIView.as_view()),
 ]
