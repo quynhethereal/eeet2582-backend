@@ -50,18 +50,32 @@ def correct_text_paragraph(paragraph_id):
 
 
 @app.task
-def process_paragraph():
-    user_doc = UserDocument.objects.latest('created_at')
+def process_paragraph(user_doc_id):
+    user_doc = UserDocument.objects.get(id=user_doc_id)
+
+    if not user_doc:
+        return 'No document found'
+    
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
     result = group(correct_text_paragraph.s(paragraph.id) for paragraph in paragraphs).apply_async()
     return result
 
 
 @app.task
-def process_docx():
-    result = process_paragraph.apply_async()
+def process_docx(user_doc_id):
+    result = process_paragraph.apply_async([user_doc_id])
+    # may process title, headings, endnotes, etc. here
     return result
 
+@app.task
+def process_latest_docx():
+    user_doc = UserDocument.objects.latest('created_at')
+    
+    if not user_doc:
+        return 'No document found'
+
+    result = process_docx.apply_async([user_doc.id])
+    return result
 
 def process_docx_old():
     user_doc = UserDocument.objects.latest('created_at')
