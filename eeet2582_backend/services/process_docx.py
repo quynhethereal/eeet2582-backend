@@ -70,9 +70,9 @@ def process_docx_old():
 
 def process_paragraph_old(user_doc):
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
-    paragraph_result = DocumentParagraphResult.objects.create(original_paragraph=paragraph)
 
     for paragraph in paragraphs:
         if paragraph.content:
+            paragraph_result = DocumentParagraphResult.objects.create(original_paragraph=paragraph)
             paragraph_result.content = correct_text(paragraph.content)
             paragraph_result.save()
