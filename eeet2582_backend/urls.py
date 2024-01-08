@@ -23,6 +23,7 @@ from drf_yasg import openapi
 from rest_framework import permissions
 
 from eeet2582_backend.api.views.parse_docx import ParseDocxAPIView
+from eeet2582_backend.api.views.s3_upload import UploadToS3APIView
 from .api.views import google_login, payment, webhook
 
 schema_view = get_schema_view(

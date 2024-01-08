@@ -51,7 +51,7 @@ class ParseDocxService:
                 if paragraph.text.strip() and not document_title:
                     document_title = DocumentTitle.objects.create(title=paragraph.text)
 
-                    document_instance = UserDocument.objects.create(document_title=document_title)
+                    document_instance = UserDocument.objects.create(document_title=document_title, content=self.file_path)
                     continue
 
                 elif document_instance:
@@ -59,7 +59,7 @@ class ParseDocxService:
 
                     if paragraph_content:
                         # check if the paragraph is a heading
-                        if re.match(self.heading_pattern, paragraph.style.name)
+                        if re.match(self.heading_pattern, paragraph.style.name):
 
                             # handle subheadings
                             headings_without_paragraphs = Heading.objects.filter(user_document=document_instance,
