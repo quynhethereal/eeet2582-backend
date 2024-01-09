@@ -4,9 +4,6 @@ import re
 
 from eeet2582_backend.models import *
 
-# Import for testing return_docx
-from .return_docx import create_docx
-
 from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
 from eeet2582_backend.api.models.document_title import DocumentTitle
 from eeet2582_backend.api.models.endnote import EndNote
@@ -175,6 +172,4 @@ class ParseDocxService:
                 #     image.save(f"extracted_image{image_no}.png")
                 #     image_no = image_no + 1
         
-        #Testing function for the return_docx.py
-        create_docx()
         return document_instance.id
