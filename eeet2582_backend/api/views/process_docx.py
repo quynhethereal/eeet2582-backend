@@ -9,7 +9,6 @@ from eeet2582_backend.services.process_docx import process_latest_docx
 
 class ProcessDocxAPIView(APIView):
     authentication_classes = []
-
     permission_classes = []
 
     def post(self, request, *args, **kwargs):

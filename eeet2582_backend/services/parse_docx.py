@@ -2,7 +2,6 @@ from docx import Document
 import re
 
 from eeet2582_backend.models import *
-from .return_docx import create_docx
 
 from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
 from eeet2582_backend.api.models.document_title import DocumentTitle

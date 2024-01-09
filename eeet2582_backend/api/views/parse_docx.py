@@ -7,6 +7,7 @@ from rest_framework import status
 from eeet2582_backend.authentication.authentication import GoogleOAuth2Authentication
 from eeet2582_backend.services.parse_docx import ParseDocxService
 from eeet2582_backend.celery import app
+from eeet2582_backend.services.process_docx import process_user_doc
 
 
 class ParseDocxAPIView(APIView):
@@ -46,11 +47,10 @@ class ParseDocxAPIView(APIView):
 
             current_user_id = request.user.id
 
-            result = self.parse_docx_task.delay(file_path, current_user_id)
+            # result = self.parse_docx_task.delay(file_path, current_user_id)
 
-            # You can do other things here while the Celery task is running
+            result = process_user_doc(file_path, current_user_id)
 
-            # Return a response indicating that the task is in progress
-            return Response({"task_id": result.id}, status=status.HTTP_202_ACCEPTED)
+            return Response({"task_id": result}, status=status.HTTP_202_ACCEPTED)
 
         return Response({"detail": "Invalid request. Please provide a DOCX file."}, status=status.HTTP_400_BAD_REQUEST)

@@ -1,4 +1,3 @@
-
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
@@ -18,11 +17,13 @@ class TaskStatusAPIView(APIView):
             task = app.AsyncResult(task_id)
 
             if task.state == 'SUCCESS':
-                return Response({"task_id": task_id, "result": task.get(), "status": task.state}, status=status.HTTP_200_OK)
+                return Response({"task_id": task_id, "result": task.get(), "status": task.state},
+                                status=status.HTTP_200_OK)
             elif task.state == 'PENDING':
                 return Response({"task_id": task_id, "status": task.state}, status=status.HTTP_202_ACCEPTED)
             elif task.state == 'FAILURE':
-                return Response({"task_id": task_id, "status": task.state}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+                return Response({"task_id": task_id, "status": task.state},
+                                status=status.HTTP_500_INTERNAL_SERVER_ERROR)
             elif task.state == 'RETRY':
                 return Response({"task_id": task_id, "status": task.state}, status=status.HTTP_200_OK)
             elif task.state == 'STARTED':
@@ -30,4 +31,5 @@ class TaskStatusAPIView(APIView):
             else:
                 return Response({"task_id": task_id, "status": task.state}, status=status.HTTP_200_OK)
         else:
-            return Response({"detail": "Invalid request. Please provide a task ID."}, status=status.HTTP_400_BAD_REQUEST)
+            return Response({"detail": "Invalid request. Please provide a task ID."},
+                            status=status.HTTP_400_BAD_REQUEST)
