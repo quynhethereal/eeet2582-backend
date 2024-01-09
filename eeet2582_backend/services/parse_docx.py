@@ -30,19 +30,24 @@ from io import StringIO
 import base64
 
 
+from ..api.models.user_model import User
+
 
 class ParseDocxService:
     heading_pattern = re.compile(r"Heading \d")
 
-    def __init__(self, file_path):
+    def __init__(self, file_path, current_user_id):
         self.file_path = file_path
-
+        self.user_id = current_user_id
     def parse(self):
         document = Document(self.file_path)
         document_instance = None
         document_title = None
         current_paragraph = None
         imagecounter = 0
+
+        current_user = User.objects.get(id=self.user_id)
+
         for element in document.element.body:
             # Case 1: Paragraph
             if isinstance(element, CT_P):
@@ -73,7 +78,7 @@ class ParseDocxService:
                 if paragraph.text.strip() and not document_title:
                     document_title = DocumentTitle.objects.create(title=paragraph.text)
 
-                    document_instance = UserDocument.objects.create(document_title=document_title)
+                    document_instance = UserDocument.objects.create(document_title=document_title, user=current_user)
                     continue
 
                 elif document_instance:
