@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from eeet2582_backend.services.parse_docx import ParseDocxService
+from eeet2582_backend.services.upload_docx import UploadDocxService
 from eeet2582_backend.celery import app
 
 
@@ -21,7 +22,6 @@ class ParseDocxAPIView(APIView):
         return result
     
     def post(self, request):
-        print("Test2")
         if request.method == 'POST' and request.FILES.get('docx_file'):
             file_obj = request.FILES['docx_file']
             # Get AWS credentials and bucket name from Django settings
@@ -35,7 +35,7 @@ class ParseDocxAPIView(APIView):
                 s3.upload_fileobj(file_obj, bucket_name, file_obj.name)
                 # Optionally, you might want to save some metadata to your database here
                 result = self.parse_docx_task.delay(f"https://group1-bucket.s3.ap-southeast-1.amazonaws.com/{file_obj.name}")
-                return Response({"task_id": result.id}, status=status.HTTP_202_ACCEPTED)
+                return Response({"task_id": result.id}, status=200)
             except Exception as e:
                 # Handle any exceptions that might occur during the upload
                 print("Error uploading file to S3:", e)

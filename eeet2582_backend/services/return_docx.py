@@ -3,7 +3,10 @@ import base64
 from io import BytesIO
 from docx.shared import Inches
 from docx import Document
+import boto3
 
+from django.conf import settings
+from rest_framework.response import Response
 from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
 from eeet2582_backend.api.models.document_title import DocumentTitle
 from eeet2582_backend.api.models.endnote import EndNote
@@ -65,7 +68,7 @@ def add_caption_to_doc(doc, caption):
     p.add_run(caption).italic = True
 
 # Function create word docx document
-def create_docx():
+def create_docx(file_name):
     user_doc = UserDocument.objects.latest('created_at')
     # Create a new Word document
     doc = Document()
@@ -143,9 +146,21 @@ def create_docx():
     # Add endnotes
     for endnote in EndNote.objects.filter(user_document=user_doc):
         add_paragraphs(doc, endnote.content)
-
+    print("Test before save")
     # Save the document
     # The filename is based on the document title;
     # Replace 'desired_path' with the actual path
-    save_path = f"output_docx/{remove_invalid(doc_title)}.docx"
-    doc.save(save_path)
+    AWS_ACCESS_KEY_ID = settings.AWS_ACCESS_KEY_ID
+    AWS_SECRET_ACCESS_KEY = settings.AWS_SECRET_ACCESS_KEY
+    bucket_name = settings.AWS_STORAGE_BUCKET_NAME
+    # Initialize the S3 client
+    s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
+    try:
+        # Upload the file object directly to S3
+        print("Testing here")
+        s3.upload_fileobj(doc, bucket_name, f"{file_name}_fixed")
+        return Response({"Success"})
+    except Exception as e:
+        # Handle any exceptions that might occur during the upload
+        print("Error uploading file to S3:", e)
+        return Response({'error': 'Failed to upload file'}, status=500)

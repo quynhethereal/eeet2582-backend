@@ -43,6 +43,7 @@ class ParseDocxService:
         document_title = None
         current_paragraph = None
         imagecounter = 0
+        file_name = self.file_path.split("/")[-1]
         for element in document.element.body:
             # Case 1: Paragraph
             if isinstance(element, CT_P):
@@ -51,7 +52,7 @@ class ParseDocxService:
                 if paragraph.text.strip() and not document_title:
                     document_title = DocumentTitle.objects.create(title=paragraph.text)
 
-                    document_instance = UserDocument.objects.create(document_title=document_title, content=self.file_path)
+                    document_instance = UserDocument.objects.create(document_title=document_title, content=file_name)
                     continue
 
                 elif document_instance:
@@ -171,5 +172,5 @@ class ParseDocxService:
                 #     image_no = image_no + 1
         
         #Testing function for the return_docx.py
-        create_docx()
+        create_docx(file_name)
         return document_instance.id
