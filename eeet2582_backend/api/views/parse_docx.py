@@ -34,7 +34,7 @@ class ParseDocxAPIView(APIView):
                 s3.upload_fileobj(file_obj, bucket_name, file_obj.name)
                 # Optionally, you might want to save some metadata to your database here
                 result = self.parse_docx_task.delay(f"https://group1-bucket.s3.ap-southeast-1.amazonaws.com/{file_obj.name}")
-                return Response({"task_id": result.id}, status=200)
+                return Response({"file_name": result}, status=200)
             except Exception as e:
                 # Handle any exceptions that might occur during the upload
                 print("Error uploading file to S3:", e)
