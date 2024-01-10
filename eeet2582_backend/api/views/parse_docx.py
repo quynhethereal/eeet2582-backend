@@ -6,7 +6,6 @@ from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from eeet2582_backend.services.parse_docx import ParseDocxService
-from eeet2582_backend.services.upload_docx import UploadDocxService
 from eeet2582_backend.celery import app
 
 
