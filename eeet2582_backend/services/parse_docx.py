@@ -173,4 +173,4 @@ class ParseDocxService:
         
         #Testing function for the return_docx.py
         create_docx(file_name)
-        return document_instance.id
+        return file_name
