@@ -1,5 +1,6 @@
 import re
 import base64
+import os
 from io import BytesIO
 from docx.shared import Inches
 from docx import Document
@@ -70,10 +71,11 @@ def add_caption_to_doc(doc, caption):
 class ReturnDocxService:
     @app.task
     # Function create word docx document
-    def create_docx(self, user_doc_id, file_name):
+    def create_docx(self, user_doc_id, file_path):
         user_doc = UserDocument.objects.get(id=user_doc_id)
         # Create a new Word document
         doc = Document()
+        file_name = file_path.split("\\")[-1]
 
         # Add the title to the document
         doc_title = user_doc.document_title.title
@@ -162,7 +164,6 @@ class ReturnDocxService:
         # Add endnotes
         for endnote in EndNote.objects.filter(user_document=user_doc):
             add_paragraphs(doc, endnote.content)
-        print("Test before save")
         # Save the document
         # The filename is based on the document title;
         # Replace 'desired_path' with the actual path
@@ -180,6 +181,7 @@ class ReturnDocxService:
             # Upload the file object directly to S3
             print("Testing here")
             s3.upload_fileobj(doc_io, bucket_name, f"fixed_{file_name}")
+            os.remove(file_path)
             return f"fixed_{file_name}"
         except Exception as e:
             # Handle any exceptions that might occur during the upload
