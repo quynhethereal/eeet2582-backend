@@ -4,9 +4,6 @@ import re
 
 from eeet2582_backend.models import *
 
-# Import for testing return_docx
-from .return_docx import create_docx
-
 from eeet2582_backend.api.models.document_paragraph import DocumentParagraph
 from eeet2582_backend.api.models.document_title import DocumentTitle
 from eeet2582_backend.api.models.endnote import EndNote
@@ -30,20 +27,25 @@ from io import StringIO
 import base64
 
 
+from ..api.models.user_model import User
+
 
 class ParseDocxService:
     heading_pattern = re.compile(r"Heading \d")
 
-    def __init__(self, file_path):
+    def __init__(self, file_path, current_user_id):
         self.file_path = file_path
-
+        self.user_id = current_user_id
     def parse(self):
         document = Document(self.file_path)
         document_instance = None
         document_title = None
         current_paragraph = None
         imagecounter = 0
-        file_name = self.file_path.split("\\")[-1]
+        
+
+        current_user = User.objects.get(id=self.user_id)
+
         for element in document.element.body:
             # Case 1: Paragraph
             if isinstance(element, CT_P):
@@ -52,7 +54,7 @@ class ParseDocxService:
                 if paragraph.text.strip() and not document_title:
                     document_title = DocumentTitle.objects.create(title=paragraph.text)
 
-                    document_instance = UserDocument.objects.create(document_title=document_title, content=file_name)
+                    document_instance = UserDocument.objects.create(document_title=document_title, user=current_user)
                     continue
 
                 elif document_instance:
@@ -171,6 +173,4 @@ class ParseDocxService:
                 #     image.save(f"extracted_image{image_no}.png")
                 #     image_no = image_no + 1
         
-        #Testing function for the return_docx.py
-        create_result = create_docx(file_name)
-        return create_result
+        return document_instance.id
