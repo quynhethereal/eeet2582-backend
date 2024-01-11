@@ -42,6 +42,8 @@ class ParseDocxService:
         document_title = None
         current_paragraph = None
         imagecounter = 0
+        file_name = self.file_path.split("\\")[-1]
+        
         
 
         current_user = User.objects.get(id=self.user_id)
@@ -54,7 +56,7 @@ class ParseDocxService:
                 if paragraph.text.strip() and not document_title:
                     document_title = DocumentTitle.objects.create(title=paragraph.text)
 
-                    document_instance = UserDocument.objects.create(document_title=document_title, user=current_user)
+                    document_instance = UserDocument.objects.create(document_title=file_name, user=current_user)
                     continue
 
                 elif document_instance:
