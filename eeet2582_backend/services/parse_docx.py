@@ -43,7 +43,7 @@ class ParseDocxService:
         document_title = None
         current_paragraph = None
         imagecounter = 0
-        file_name = self.file_path.split("/")[-1]
+        file_name = self.file_path.split("\\")[-1]
         for element in document.element.body:
             # Case 1: Paragraph
             if isinstance(element, CT_P):
@@ -172,5 +172,5 @@ class ParseDocxService:
                 #     image_no = image_no + 1
         
         #Testing function for the return_docx.py
-        create_docx(file_name)
-        return f"{file_name}_fixed"
+        create_result = create_docx(file_name)
+        return create_result

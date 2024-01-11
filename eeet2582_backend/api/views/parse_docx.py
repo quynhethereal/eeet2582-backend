@@ -20,24 +20,33 @@ class ParseDocxAPIView(APIView):
         result = docx_parser.parse()
         return result
     
-    def post(self, request):
-        if request.method == 'POST' and request.FILES.get('docx_file'):
-            file_obj = request.FILES['docx_file']
-            # Get AWS credentials and bucket name from Django settings
-            AWS_ACCESS_KEY_ID = settings.AWS_ACCESS_KEY_ID
-            AWS_SECRET_ACCESS_KEY = settings.AWS_SECRET_ACCESS_KEY
-            bucket_name = settings.AWS_STORAGE_BUCKET_NAME
-            # Initialize the S3 client
-            s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
-            try:
-                # Upload the file object directly to S3
-                s3.upload_fileobj(file_obj, bucket_name, file_obj.name)
-                # Optionally, you might want to save some metadata to your database here
-                result = self.parse_docx_task.delay(f"https://group1-bucket.s3.ap-southeast-1.amazonaws.com/{file_obj.name}")
-                return Response({"file_name": result}, status=200)
-            except Exception as e:
-                # Handle any exceptions that might occur during the upload
-                print("Error uploading file to S3:", e)
-                return Response({'error': 'Failed to upload file'}, status=500)
+    def post(self, request, *args, **kwargs):
+        if request.FILES.get('docx_file'):
+            docx_file = request.FILES['docx_file']
 
-        return Response({'error': 'Invalid request'}, status=400)
+            # TODO: Change this to upload to a temporary directory
+            temporary_directory = 'uploads'
+            if not os.path.exists(temporary_directory):
+                os.makedirs(temporary_directory)
+
+            # TODO: Change this to upload to a temporary directory
+            file_path = os.path.join(temporary_directory, docx_file.name)
+            with open(file_path, 'wb') as destination:
+                for chunk in docx_file.chunks():
+                    destination.write(chunk)
+
+            #     result = self.parse_docx_task.delay(file_path).get()
+            #
+            #     if result:
+            #         return Response({"title": result.title}, status=status.HTTP_200_OK)
+            #     else:
+            #         return Response({"detail": "No title found in the document."}, status=status.HTTP_404_NOT_FOUND)
+            #
+            # return Response({"detail": "Invalid request. Please provide a DOCX file."}, status=status.HTTP_400_BAD_REQUEST)
+            current_user_id = request.user.id
+
+            result = self.parse_docx_task.delay(file_path)
+
+            return Response({"task_id": result}, status=status.HTTP_202_ACCEPTED)
+
+        return Response({"detail": "Invalid request. Please provide a DOCX file."}, status=status.HTTP_400_BAD_REQUEST)
