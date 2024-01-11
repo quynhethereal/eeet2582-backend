@@ -57,6 +57,7 @@ def correct_text_paragraph(paragraph_id):
 def process_user_doc(file_path, current_user_id):
     docx_parser = ParseDocxService(file_path, current_user_id)
     parsed_docx_id = docx_parser.parse()
+    file_name = file_path.split("\\")[-1]
 
     user_doc = UserDocument.objects.get(id=parsed_docx_id)
 
@@ -66,7 +67,7 @@ def process_user_doc(file_path, current_user_id):
     paragraphs = DocumentParagraph.objects.filter(user_document=user_doc).order_by('id')
 
     result = chord(correct_text_paragraph.s(paragraph.id) for paragraph in paragraphs)(ReturnDocxService.create_docx.s(
-        user_doc.id))
+        user_doc.id, file_name))
 
     return result.id
 
