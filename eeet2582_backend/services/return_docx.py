@@ -75,7 +75,8 @@ class ReturnDocxService:
         user_doc = UserDocument.objects.get(id=user_doc_id)
         # Create a new Word document
         doc = Document()
-        file_name = file_path.split("\\")[-1]
+        normalized_path = os.path.normpath(file_path)
+        file_name = os.path.split(normalized_path)[-1]
 
         # Add the title to the document
         doc_title = user_doc.document_title.title
