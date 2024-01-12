@@ -56,7 +56,7 @@ class ParseDocxService:
                 if paragraph.text.strip() and not document_title:
                     document_title = DocumentTitle.objects.create(title=paragraph.text)
 
-                    document_instance = UserDocument.objects.create(document_title=file_name, user=current_user)
+                    document_instance = UserDocument.objects.create(document_title=document_title, user=current_user)
                     continue
 
                 elif document_instance:

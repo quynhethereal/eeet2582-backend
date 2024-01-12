@@ -137,20 +137,6 @@ class ReturnDocxService:
                 for caption in related_captions:
                     add_caption_to_doc(doc, caption.content)
 
-            # Case Headings without paragraphs ID
-            standalone_headings = headings.filter(document_paragraph__isnull=True)
-            for heading in standalone_headings:
-                add_headings(doc, heading.content, level=1)
-            # Subheading
-            related_subheadings = Subheading.objects.filter(heading=heading)
-            for subheading in related_subheadings:
-                subheading_level = int(re.search(r'\d+', subheading.type).group()) if re.search(r'\d+', subheading.type) else 2
-                add_headings(doc, subheading.content, level=subheading_level)
-                
-            # Add endnotes
-            for endnote in EndNote.objects.filter(user_document=user_doc):
-                add_paragraphs(doc, endnote.content)
-
         # Case Headings without paragraphs ID
         standalone_headings = headings.filter(document_paragraph__isnull=True)
         for heading in standalone_headings:
