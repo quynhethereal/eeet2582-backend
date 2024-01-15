@@ -138,6 +138,12 @@ brew services start redis
 celery -A eeet2582_backend worker --loglevel=info
 ```
 
+4. Flush Redis(only do to reset redis)
+```bash
+redis-cli flushall
+```
+
+
 ## run ngrok for Stripe webhook call
 1. After runing the server locally on port 8000
 2. download the ngrok.exe

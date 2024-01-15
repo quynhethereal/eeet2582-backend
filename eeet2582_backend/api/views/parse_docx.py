@@ -1,4 +1,6 @@
 import os
+import uuid
+
 import boto3
 
 from django.conf import settings
@@ -33,7 +35,8 @@ class ParseDocxAPIView(APIView):
                 os.makedirs(temporary_directory)
 
             # TODO: Change this to upload to a temporary directory
-            file_path = os.path.join(temporary_directory, docx_file.name)
+            random_hash = str(uuid.uuid4().hex)
+            file_path = os.path.join(temporary_directory, f"{random_hash}_{docx_file.name}")
             with open(file_path, 'wb') as destination:
                 for chunk in docx_file.chunks():
                     destination.write(chunk)
