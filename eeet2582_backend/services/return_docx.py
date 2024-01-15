@@ -20,6 +20,7 @@ from eeet2582_backend.api.models.row_cell import RowCell
 from eeet2582_backend.api.models.document_image import DocumentImage
 from eeet2582_backend.api.models.caption import Caption
 from eeet2582_backend.celery import app
+from eeet2582_backend.services import upload_to_s3
 
 # Function remove invalid characters in filename
 def remove_invalid(filename):
@@ -152,25 +153,5 @@ class ReturnDocxService:
         for endnote in EndNote.objects.filter(user_document=user_doc):
             add_paragraphs(doc, endnote.content)
         # Save the document
-        # The filename is based on the document title;
-        # Replace 'desired_path' with the actual path
-        AWS_ACCESS_KEY_ID = settings.AWS_ACCESS_KEY_ID
-        AWS_SECRET_ACCESS_KEY = settings.AWS_SECRET_ACCESS_KEY
-        bucket_name = settings.AWS_STORAGE_BUCKET_NAME
-        doc_io = BytesIO()
-        doc.save(doc_io)
-
-        # Reset the BytesIO cursor position to the beginning
-        doc_io.seek(0)
-        # Initialize the S3 client
-        s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
-        try:
-            # Upload the file object directly to S3
-            print("Testing here")
-            s3.upload_fileobj(doc_io, bucket_name, f"fixed_{file_name}")
-            os.remove(file_path)
-            return f"fixed_{file_name}"
-        except Exception as e:
-            # Handle any exceptions that might occur during the upload
-            print("Error uploading file to S3:", e)
-            return 'Failed to upload file'
+        result = upload_to_s3.upload_to_s3(doc, file_path)
+        return f"https://group1-bucket.s3.ap-southeast-1.amazonaws.com/{result}"
