@@ -2,7 +2,6 @@
 __pycache__
 db.sqlite3
 /env
-*.env
 .vscode
 .tool-versions
 poetry.lock
