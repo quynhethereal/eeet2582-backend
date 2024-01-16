@@ -155,3 +155,6 @@ ngrok config add-authtoken 2a1bssHACk98o1MV40hwaWna3TS_NpUqCqMpqfookK7DJaxb
 ```bash
  ngrok http --domain smiling-narwhal-remotely.ngrok-free.app 8000
 ```
+
+sudo apt install python3.12-dev
+sudo apt-get install libpq-dev

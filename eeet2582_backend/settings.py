@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-c$)+36!u&6#6e9gs8^@8=lf$b6+i33dvon12vk7z8c113fb6d-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['smiling-narwhal-remotely.ngrok-free.app', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['smiling-narwhal-remotely.ngrok-free.app','18.143.175.157','127.0.0.1', 'localhost']
 
 # Application definition
 
