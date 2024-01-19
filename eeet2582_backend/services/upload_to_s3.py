@@ -19,7 +19,6 @@ def upload_to_s3(doc, file_path):
     s3 = boto3.client('s3', aws_access_key_id=AWS_ACCESS_KEY_ID, aws_secret_access_key=AWS_SECRET_ACCESS_KEY)
     try:
         # Upload the file object directly to S3
-        print("Testing here")
         s3.upload_fileobj(doc_io, bucket_name, f"fixed_{file_name}")
         os.remove(file_path)
         return f"fixed_{file_name}"
