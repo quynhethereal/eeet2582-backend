@@ -27,7 +27,7 @@ SECRET_KEY = 'django-insecure-c$)+36!u&6#6e9gs8^@8=lf$b6+i33dvon12vk7z8c113fb6d-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
 
-ALLOWED_HOSTS = ['smiling-narwhal-remotely.ngrok-free.app', '127.0.0.1', 'localhost']
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -161,10 +161,10 @@ ACCOUNT_EMAIL_VERIFICATION = "none"
 LOGIN_REDIRECT_URL = "home"
 ACCOUNT_LOGOUT_ON_GET = True
 
-STRIPE_WEBHOOK_SECRET = "whsec_VM2iE8jBU8yqeIxN0VlD0x6YkxipPTJe"
+STRIPE_WEBHOOK_SECRET = "whsec_o46piscbkWXSeX0EOPkiEG2gbwjBeS3b"
 STRIPE_SECRET_KEY = "sk_test_51OPyOTE2WWDOW84JHiEZ8gORgRhFci7J76jZMfTljyz9hRqutP06hvdSwAVwsrrX9ClBO3W8dil3Ur96g3NN3Lay00iQXUtx38"
 STRIPE_3MONTH_PRICE_ID = "price_1OQTxQE2WWDOW84JhtZPjyp5"
-FRONT_END_DOMAIN = "http://localhost:5173/"
+FRONT_END_DOMAIN = "https://d2evw27rapybtm.cloudfront.net/"
 
 CELERY_BROKER_URL = "redis://localhost:6379"
 CELERY_RESULT_BACKEND = 'django-db'
