@@ -121,9 +121,7 @@ class ParseDocxService:
                     root = ET.fromstring(xmlstr) 
                     #Check if pic is there in the xml of the element. If yes, then extract the image data
                     if 'pic:pic' in xmlstr:
-                        print("ImageFound")
-                        for pic in root.findall('.//pic:pic', my_namespaces):
-                            print("ImageFound 2")
+                        for pic in root.findall('.//pic:pic', my_namespaces):                      
                             cNvPr_elem = pic.find("pic:nvPicPr/pic:cNvPr", my_namespaces)
                             name_attr = cNvPr_elem.get("name")
                             blip_elem = pic.find("pic:blipFill/a:blip", my_namespaces)
@@ -158,21 +156,5 @@ class ParseDocxService:
 
                         # Create a RowCell instance for each cell in the row
                         RowCell.objects.create(user_document=document_instance, document_table=document_table, table_row=table_row, content=cell_content)
-            elif isinstance(element, CT_Inline):
-            # else:
-                print("image found 11")
-                # xmlstr = str(element.xml)
-                # root = etree.fromstring(xmlstr)
-                # # if element.tag.endswith('}drawing'):
-                # # Extract image logic here
-                # image_part = element.find('.//a:blip', namespaces=nsmap)
-                # if image_part is not None:
-                #     image_id = image_part.attrib['{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed']
-                #     image_data = document.part.related_parts[image_id]._blob  # Binary image data
-                #     # Process image_data as needed (save, convert, etc.)
-                #     DocumentImage.objects.create(user_document=document_instance, document_paragraph=current_paragraph, file_name=f"image_{image_no}", content = image_data) 
-                #     image = Image.open(BytesIO(image_data))
-                #     image.save(f"extracted_image{image_no}.png")
-                #     image_no = image_no + 1
         
         return document_instance.id
